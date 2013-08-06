@@ -7,13 +7,15 @@ import java.util.Map;
 
 import com.brew.lib.model.BrewData;
 import com.brew.lib.model.BrewMessage;
+import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.SWITCH_NAME;
 import com.brew.lib.model.SensorTransport;
 import com.brew.lib.model.SwitchTransport;
 import com.brew.server.Sensor.SensorListener;
 import com.brew.server.Switch.SwitchListener;
-import com.brew.server.socket.SocketManager;
+import com.brew.server.socket.SocketChannel;
+import com.brew.server.socket.SocketConnection;
 
 public class SensorManager {
 
@@ -39,9 +41,9 @@ public class SensorManager {
 					Switch switchh = switches.get(sw.getSwitchName());
 					if (switchh != null) {
 						switchh.setValue(sw.getSwitchValue());
-					}
-					else{
-						System.out.println("no value for " + sw.getSwitchName());
+					} else {
+						System.out
+								.println("no value for " + sw.getSwitchName());
 					}
 
 				}
@@ -73,7 +75,8 @@ public class SensorManager {
 
 			message.setData(data);
 
-			SocketManager.broadcastMessage(message);
+			SocketChannel.get(SOCKET_CHANNEL.BREW_CONTROL).sendBroadcast(
+					message);
 
 		}
 
@@ -103,13 +106,14 @@ public class SensorManager {
 
 			message.setData(data);
 
-			SocketManager.broadcastMessage(message);
+			SocketChannel.get(SOCKET_CHANNEL.BREW_CONTROL).sendBroadcast(
+					message);
 
 		}
 
 	};
 
-	public static void requestDump(final String socketId) {
+	public static void requestDump(final SocketConnection socket) {
 
 		new Thread() {
 
@@ -159,7 +163,8 @@ public class SensorManager {
 
 				message.setData(data);
 
-				SocketManager.sendMessage(message, socketId);
+				socket.sendMessage(message);
+				// SocketManager.sendMessage(message, socketId);
 
 				super.run();
 			}

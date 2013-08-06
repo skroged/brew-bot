@@ -12,6 +12,8 @@ public class BrewMessage {
 
 	private String confirmId;
 
+	private SOCKET_CHANNEL channel;
+
 	public SOCKET_METHOD getMethod() {
 		return method;
 	}
