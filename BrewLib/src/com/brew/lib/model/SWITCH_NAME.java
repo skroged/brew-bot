@@ -1,0 +1,6 @@
+package com.brew.lib.model;
+
+public enum SWITCH_NAME {
+
+	HLT_PUMP, HLT_BURNER, HLT_HLT, HLT_MLT, MLT_PUMP, MLT_BURNER, MLT_MLT, MLT_BK, BK_PUMP, BK_BURNER, BK_BK, BK_FERM, IGNITER;
+}
