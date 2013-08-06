@@ -4,3 +4,6 @@ BrewDroid\gen/
 BrewLib/bin/
 BrewLib/gen/
 BrewLib\gen/
+BrewServer/bin/
+BrewServer/gen/
+BrewServer\gen/
