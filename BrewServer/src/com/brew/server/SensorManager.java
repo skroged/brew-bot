@@ -148,7 +148,7 @@ public class SensorManager {
 
 					SwitchTransport switchTransport = new SwitchTransport();
 
-					Map.Entry pairs = (Map.Entry) it.next();
+					Map.Entry<?,?> pairs = (Map.Entry<?,?>) it.next();
 
 					Switch switchh = (Switch) pairs.getValue();
 

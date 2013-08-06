@@ -54,4 +54,12 @@ public class BrewMessage {
 		this.confirmId = confirmId;
 	}
 
+	public SOCKET_CHANNEL getChannel() {
+		return channel;
+	}
+
+	public void setChannel(SOCKET_CHANNEL channel) {
+		this.channel = channel;
+	}
+
 }

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.brew.lib.model.SWITCH_NAME;
-import com.brew.server.Sensor.SensorListener;
 
 public class Switch {
 

@@ -15,7 +15,7 @@ public class Sensor {
 	public static final String ONE_WIRE_PATH_END = "/w1_slave";
 
 	public static final String TEMP_1_ID = "28-00000474d694";
-	private static final long UPDATE_SLEEP = 1000;
+	//private static final long UPDATE_SLEEP = 1000;
 
 	private String sensorId;
 	private float value;

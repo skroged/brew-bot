@@ -19,7 +19,7 @@ public class SocketConnection {
 	private Socket socket;
 	private PrintWriter out;
 	private BufferedReader in;
-	private String id;
+//	private String id;
 
 	public SocketConnection(Socket socket) {
 		this.socket = socket;
@@ -97,6 +97,29 @@ public class SocketConnection {
 		// clientSocketListener.onSocketIdentified(this);
 		//
 		// break;
+		case UNSUBSCRIBE:
+
+			SOCKET_CHANNEL unsubscribeChannel = message.getChannel();
+
+			if (unsubscribeChannel == null) {
+				System.out.println("attempted to unsubscribe to null channel!");
+			}
+
+			SocketChannel.get(unsubscribeChannel).removeSocketConnection(this);
+
+			break;
+
+		case SUBSCRIBE:
+
+			SOCKET_CHANNEL subscribeChannel = message.getChannel();
+
+			if (subscribeChannel == null) {
+				System.out.println("attempted to subscribe to null channel!");
+			}
+
+			SocketChannel.get(subscribeChannel).addSocketConnection(this);
+
+			break;
 
 		case REQUEST_DUMP:
 
