@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/r"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/mainThree"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="BK" />
+
+            <TextView
+                android:id="@+id/bkTempText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="110°" />
+
+            <TextView
+                android:id="@+id/bkVolumeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="3.5 Gal" />
+
+            <RelativeLayout
+                android:id="@+id/bkBurnerButton"
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center_horizontal"
+                android:padding="3dp" >
+
+                <com.example.brewdroid.OnOffIndicator
+                    android:id="@+id/bkBurnerIndicator"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_centerInParent="true" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Burner" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/bkPumpButton"
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center_horizontal"
+                android:padding="3dp" >
+
+                <com.example.brewdroid.OnOffIndicator
+                    android:id="@+id/bkPumpIndicator"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_centerInParent="true" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Pump" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <RelativeLayout
+                    android:id="@+id/bkFermButton"
+                    android:layout_width="60dp"
+                    android:layout_height="25dp"
+                    android:padding="3dp" >
+
+                    <com.example.brewdroid.OnOffIndicator
+                        android:id="@+id/bkFermIndicator"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_centerInParent="true" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="Transfer" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/bkBkButton"
+                    android:layout_width="60dp"
+                    android:layout_height="25dp"
+                    android:padding="3dp" >
+
+                    <com.example.brewdroid.OnOffIndicator
+                        android:id="@+id/bkBkIndicator"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_centerInParent="true" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="Recirc" />
+                </RelativeLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="MLT" />
+
+            <TextView
+                android:id="@+id/mltTempText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="110°" />
+
+            <TextView
+                android:id="@+id/mltVolumeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="" />
+
+            <RelativeLayout
+                android:id="@+id/mltBurnerButton"
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center_horizontal"
+                android:padding="3dp" >
+
+                <com.example.brewdroid.OnOffIndicator
+                    android:id="@+id/mltBurnerIndicator"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_centerInParent="true" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Burner" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/mltPumpButton"
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center_horizontal"
+                android:padding="3dp" >
+
+                <com.example.brewdroid.OnOffIndicator
+                    android:id="@+id/mltPumpIndicator"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_centerInParent="true" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Pump" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <RelativeLayout
+                    android:id="@+id/mltBkButton"
+                    android:layout_width="60dp"
+                    android:layout_height="25dp"
+                    android:padding="3dp" >
+
+                    <com.example.brewdroid.OnOffIndicator
+                        android:id="@+id/mltBkIndicator"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_centerInParent="true" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="Transfer" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/mltMltButton"
+                    android:layout_width="60dp"
+                    android:layout_height="25dp"
+                    android:padding="3dp" >
+
+                    <com.example.brewdroid.OnOffIndicator
+                        android:id="@+id/mltMltIndicator"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_centerInParent="true" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="Recirc" />
+                </RelativeLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="HLT" />
+
+            <TextView
+                android:id="@+id/hltTempText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="110°" />
+
+            <TextView
+                android:id="@+id/hltVolumeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="3.5 Gal" />
+
+            <RelativeLayout
+                android:id="@+id/hltBurnerButton"
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center_horizontal"
+                android:padding="3dp" >
+
+                <com.example.brewdroid.OnOffIndicator
+                    android:id="@+id/hltBurnerIndicator"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_centerInParent="true" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Burner" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/hltPumpButton"
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center_horizontal"
+                android:padding="3dp" >
+
+                <com.example.brewdroid.OnOffIndicator
+                    android:id="@+id/hltPumpIndicator"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_centerInParent="true" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Pump" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <RelativeLayout
+                    android:id="@+id/hltMltButton"
+                    android:layout_width="60dp"
+                    android:layout_height="25dp"
+                    android:padding="3dp" >
+
+                    <com.example.brewdroid.OnOffIndicator
+                        android:id="@+id/hltMltIndicator"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_centerInParent="true" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="Transfer" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/hltHltButton"
+                    android:layout_width="60dp"
+                    android:layout_height="25dp"
+                    android:padding="3dp" >
+
+                    <com.example.brewdroid.OnOffIndicator
+                        android:id="@+id/hltHltIndicator"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_centerInParent="true" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="Recirc" />
+                </RelativeLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/igniterButton"
+        android:layout_width="60dp"
+        android:layout_height="25dp"
+        android:layout_below="@+id/mainThree"
+        android:layout_centerHorizontal="true"
+        android:padding="3dp" >
+
+        <com.example.brewdroid.OnOffIndicator
+            android:id="@+id/igniterIndicator"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_centerInParent="true" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Igniter" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/connectedText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="Connected" />
+
+    <TextView
+        android:id="@+id/pingText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_margin="10dp"
+        android:text="Ping: 30ms" />
+
+    <TextView
+        android:id="@+id/fermTempText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mainThree"
+        android:layout_toLeftOf="@+id/mainThree"
+        android:text="110°" />
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="10dp" />
+
+</RelativeLayout>
