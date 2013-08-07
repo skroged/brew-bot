@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -17,6 +18,8 @@ import com.brew.client.socket.SocketManager;
 import com.brew.client.socket.SocketManager.SocketManagerListener;
 import com.brew.lib.model.BrewData;
 import com.brew.lib.model.BrewMessage;
+import com.brew.lib.model.CHANNEL_PERMISSION;
+import com.brew.lib.model.LogMessage;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.SWITCH_NAME;
@@ -72,6 +75,7 @@ public class BrewControlActivity extends Activity {
 	private OnOffIndicator igniterIndicator;
 
 	private TextView connectedText;
+	private TextView permissionText;
 	private TextView pingText;
 
 	@Override
@@ -84,6 +88,7 @@ public class BrewControlActivity extends Activity {
 		handler = new Handler();
 
 		connectedText = (TextView) findViewById(R.id.connectedText);
+		permissionText = (TextView) findViewById(R.id.permissionText);
 		pingText = (TextView) findViewById(R.id.pingText);
 
 		hltTempText = (TextView) findViewById(R.id.hltTempText);
@@ -166,6 +171,7 @@ public class BrewControlActivity extends Activity {
 		fermTempText.setText("UNKNOWN");
 
 		pingText.setText("");
+		permissionText.setText("");
 
 	}
 
@@ -269,7 +275,6 @@ public class BrewControlActivity extends Activity {
 				public void run() {
 					connectedText.setText("Diconnected");
 					connectedText.setTextColor(Color.RED);
-					pingText.setVisibility(View.GONE);
 					setAllUnknown();
 
 					stopPingLoop();
@@ -287,7 +292,6 @@ public class BrewControlActivity extends Activity {
 				public void run() {
 					connectedText.setText("Connected");
 					connectedText.setTextColor(Color.GREEN);
-					pingText.setVisibility(View.VISIBLE);
 
 					startPingLoop();
 				}
@@ -420,7 +424,7 @@ public class BrewControlActivity extends Activity {
 							case HLT_TEMP:
 
 								if (setValue) {
-									hltTempText.setText(st.getValue() + " °F");
+									hltTempText.setText(st.getValue() + " ¡F");
 								}
 
 								break;
@@ -518,7 +522,34 @@ public class BrewControlActivity extends Activity {
 		}
 
 		@Override
-		public void onUserRegisterResult(boolean success) {
+		public void onAuthResult(boolean success) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onSubscribeResult(SOCKET_CHANNEL channel,
+				final CHANNEL_PERMISSION permission) {
+
+			if (channel == SOCKET_CHANNEL.BREW_CONTROL) {
+				if (permissionText == null) {
+					Log.i("JOSH", "permissionText is null!!!??");
+				} else {
+					handler.post(new Runnable() {
+
+						@Override
+						public void run() {
+							permissionText.setText("Permission: " + permission);
+						}
+
+					});
+
+				}
+			}
+		}
+
+		@Override
+		public void onLogReceived(LogMessage logMessage) {
 			// TODO Auto-generated method stub
 
 		}
@@ -535,7 +566,6 @@ public class BrewControlActivity extends Activity {
 
 			connectedText.setText("Connected");
 			connectedText.setTextColor(Color.GREEN);
-			pingText.setVisibility(View.VISIBLE);
 
 			startPingLoop();
 
@@ -545,7 +575,6 @@ public class BrewControlActivity extends Activity {
 
 			connectedText.setText("Diconnected");
 			connectedText.setTextColor(Color.RED);
-			pingText.setVisibility(View.GONE);
 
 			stopPingLoop();
 
@@ -593,6 +622,8 @@ public class BrewControlActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+
+		stopPingLoop();
 
 		SocketManager.unregisterSocketManagerListener(socketManagerListener);
 

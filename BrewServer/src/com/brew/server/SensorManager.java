@@ -113,7 +113,7 @@ public class SensorManager {
 
 	};
 
-	public static void requestDump(final SocketConnection socket) {
+	public static void requestDataDump(final SocketConnection socket) {
 
 		new Thread() {
 

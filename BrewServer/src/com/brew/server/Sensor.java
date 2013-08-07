@@ -15,7 +15,7 @@ public class Sensor {
 	public static final String ONE_WIRE_PATH_END = "/w1_slave";
 
 	public static final String TEMP_1_ID = "28-00000474d694";
-	//private static final long UPDATE_SLEEP = 1000;
+	// private static final long UPDATE_SLEEP = 1000;
 
 	private String sensorId;
 	private float value;
@@ -31,11 +31,7 @@ public class Sensor {
 
 		try {
 
-			// System.out.println("reading sensor at path");
-
 			String path = ONE_WIRE_PATH_START + sensorId + ONE_WIRE_PATH_END;
-
-			// System.out.println(path);
 
 			FileReader fileReader = new FileReader(path);
 
@@ -79,11 +75,9 @@ public class Sensor {
 
 			}
 
-			// System.out.println(everything);
-
 			br.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Logger.log("ERROR", e.getMessage());
 		}
 
 	}
@@ -96,12 +90,12 @@ public class Sensor {
 			Runtime.getRuntime().exec("sudo modprobe w1-gpio");
 			Runtime.getRuntime().exec("sudo modprobe w1-therm");
 		} catch (IOException e) {
-			System.out.println("failed to enable one-wire");
-			e.printStackTrace();
+			Logger.log("SYSTEM", "failed to enable one-wire");
+			Logger.log("ERROR", e.getMessage());
 			return;
 		}
 
-		System.out.println("Starting ONE-WIRE");
+		Logger.log("SYSTEM", "Starting ONE-WIRE");
 
 		sensors = new ArrayList<Sensor>();
 
@@ -135,8 +129,9 @@ public class Sensor {
 
 		boolean changed = this.value != value;
 
-		if (changed)
-			System.out.println("new value for " + sensorName + ": " + value);
+		if (changed) {
+			Logger.log("DATA", sensorName + ": " + value);
+		}
 
 		this.value = value;
 
@@ -198,13 +193,6 @@ public class Sensor {
 				for (Sensor sensor : sensors) {
 					sensor.readSensor();
 				}
-
-				// try {
-				// Thread.sleep(UPDATE_SLEEP);
-				// } catch (InterruptedException e) {
-				// stopped = true;
-				// e.printStackTrace();
-				// }
 
 			}
 		}

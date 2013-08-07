@@ -1,10 +1,17 @@
 package com.brew.server.db;
 
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.brew.lib.model.CHANNEL_PERMISSION;
+import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.User;
+import com.brew.lib.model.UserChannelPermission;
+import com.brew.server.Logger;
 import com.mysql.jdbc.Connection;
 
 public class MySqlManager {
@@ -23,20 +30,20 @@ public class MySqlManager {
 
 		try {
 
-			System.out.println("connecting MySQL DB at URL: " + url);
+			Logger.log("DB", "connecting MySQL DB at URL: " + url);
 
 			connection = (Connection) DriverManager.getConnection(url, "root",
 					"ssydneyy");
 
-			System.out.println("MySQL Connection: " + connection);
+			Logger.log("DB", "MySQL Connection: " + connection);
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Logger.log("ERROR", e.getMessage());
 		}
 
 	}
 
-	public static boolean registerUser(User user) {
+	public static User registerUser(User user) {
 
 		String name = user.getName() != null ? "'" + user.getName() + "'"
 				: "NULL";
@@ -44,8 +51,8 @@ public class MySqlManager {
 		String sql = "INSERT INTO users (username, password, name) VALUES ('"
 				+ user.getUsername() + "', '" + user.getPassword() + "', "
 				+ name + ");";
-		
-		System.out.println("registering user: " + user.getUsername());
+
+		Logger.log("AUTH", "registering user: " + user.getUsername());
 
 		try {
 
@@ -53,15 +60,107 @@ public class MySqlManager {
 
 			statement.execute(sql);
 
-			System.out.println("success");
-			
-			return true;
+			Logger.log("AUTH", "success");
+
+			statement.close();
+
+			return loginUser(user);
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Logger.log("ERROR", e.getMessage());
 		}
-		
-		return false;
+
+		Logger.log("AUTH", "fail");
+
+		return null;
+
+	}
+
+	public static User loginUser(User user) {
+
+		String sql = "SELECT idusers, username, password FROM users WHERE username = '"
+				+ user.getUsername()
+				+ "' AND password = '"
+				+ user.getPassword() + "';";
+
+		Logger.log("AUTH", "authenticate user: " + user.getUsername());
+
+		try {
+
+			Statement statement = connection.createStatement();
+
+			boolean hasResults = statement.execute(sql);
+
+			if (hasResults) {
+
+				ResultSet results = statement.getResultSet();
+
+				if (results.next()) {
+
+					Logger.log("AUTH", "success");
+
+					int id = results.getInt("idusers");
+					List<UserChannelPermission> permissions = getPermissionsForUser(id);
+
+					user.setId(id);
+					user.setPermissions(permissions);
+					user.setPassword(null);
+
+					statement.close();
+
+					return user;
+				}
+			}
+
+		} catch (SQLException e) {
+			Logger.log("ERROR", e.getMessage());
+		}
+
+		Logger.log("AUTH", "fail");
+
+		return null;
+
+	}
+
+	public static List<UserChannelPermission> getPermissionsForUser(int userId) {
+
+		String sql = "SELECT channel, permission FROM permissions WHERE userId = "
+				+ userId + ";";
+
+		List<UserChannelPermission> permissions = new ArrayList<UserChannelPermission>();
+
+		try {
+			Statement statement = connection.createStatement();
+
+			boolean hasResults = statement.execute(sql);
+
+			if (hasResults) {
+
+				ResultSet results = statement.getResultSet();
+
+				while (results.next()) {
+
+					String channelStr = results.getString("channel");
+					String permissionStr = results.getString("permission");
+
+					SOCKET_CHANNEL channel = SOCKET_CHANNEL.valueOf(channelStr);
+					CHANNEL_PERMISSION permission = CHANNEL_PERMISSION
+							.valueOf(permissionStr);
+
+					UserChannelPermission userChannelPermission = new UserChannelPermission();
+					userChannelPermission.setChannel(channel);
+					userChannelPermission.setPermission(permission);
+
+					permissions.add(userChannelPermission);
+
+				}
+			}
+
+		} catch (SQLException e) {
+			Logger.log("ERROR", e.getMessage());
+		}
+
+		return permissions;
 
 	}
 

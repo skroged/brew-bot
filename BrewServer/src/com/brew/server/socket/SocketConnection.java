@@ -8,10 +8,12 @@ import java.lang.reflect.Type;
 import java.net.Socket;
 
 import com.brew.lib.model.BrewMessage;
+import com.brew.lib.model.CHANNEL_PERMISSION;
 import com.brew.lib.model.GsonHelper;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.User;
+import com.brew.server.Logger;
 import com.brew.server.SensorManager;
 import com.brew.server.db.MySqlManager;
 import com.google.gson.reflect.TypeToken;
@@ -21,6 +23,7 @@ public class SocketConnection {
 	private Socket socket;
 	private PrintWriter out;
 	private BufferedReader in;
+	private User user;
 
 	// private String id;
 
@@ -52,7 +55,7 @@ public class SocketConnection {
 						out.println(json);
 					}
 				} catch (NullPointerException e) {
-					e.printStackTrace();
+					Logger.log("ERROR", e.getMessage());
 				}
 
 				super.run();
@@ -71,13 +74,13 @@ public class SocketConnection {
 				.fromJson(inputLine, jsonType);
 
 		if (message == null) {
-			System.out.println("bad message: " + inputLine);
+			Logger.log("SOCKET", "bad message: " + inputLine);
 
 			return;
 		}
 
 		if (message.getMethod() == null) {
-			System.out.println("no method: " + inputLine);
+			Logger.log("SOCKET", "no method: " + inputLine);
 		}
 
 		if (message.getGuaranteeId() != null) {
@@ -100,25 +103,46 @@ public class SocketConnection {
 		// clientSocketListener.onSocketIdentified(this);
 		//
 		// break;
+
+		case LOGIN_USER:
+
+			if (message.getData() == null
+					|| message.getData().getUsers() == null
+					|| message.getData().getUsers().size() == 0) {
+				Logger.log("SOCKET", "error in login user packet");
+
+				return;
+			}
+
+			User loginUser = message.getData().getUsers().get(0);
+
+			user = MySqlManager.loginUser(loginUser);
+
+			BrewMessage loginResultMessage = new BrewMessage();
+			loginResultMessage.setMethod(SOCKET_METHOD.LOGIN_RESULT);
+			loginResultMessage.setSuccess(user != null);
+			sendMessage(loginResultMessage);
+
+			break;
+
 		case REGISTER_USER:
 
 			if (message.getData() == null
 					|| message.getData().getUsers() == null
 					|| message.getData().getUsers().size() == 0) {
-				System.out.println("error in register user packet");
+				Logger.log("SOCKET", "error in register user packet");
 
 				return;
 			}
 
-			for (User user : message.getData().getUsers()) {
+			User registerUser = message.getData().getUsers().get(0);
 
-				boolean success = MySqlManager.registerUser(user);
+			user = MySqlManager.registerUser(registerUser);
 
-				BrewMessage registerResultMessage = new BrewMessage();
-				registerResultMessage.setMethod(SOCKET_METHOD.REGISTER_RESULT);
-				registerResultMessage.setSuccess(success);
-				sendMessage(registerResultMessage);
-			}
+			BrewMessage registerResultMessage = new BrewMessage();
+			registerResultMessage.setMethod(SOCKET_METHOD.REGISTER_RESULT);
+			registerResultMessage.setSuccess(user != null);
+			sendMessage(registerResultMessage);
 
 			break;
 
@@ -127,7 +151,8 @@ public class SocketConnection {
 			SOCKET_CHANNEL unsubscribeChannel = message.getChannel();
 
 			if (unsubscribeChannel == null) {
-				System.out.println("attempted to unsubscribe to null channel!");
+				Logger.log("SOCKET",
+						"attempted to unsubscribe to null channel!");
 				return;
 			}
 
@@ -140,16 +165,47 @@ public class SocketConnection {
 			SOCKET_CHANNEL subscribeChannel = message.getChannel();
 
 			if (subscribeChannel == null) {
-				System.out.println("attempted to subscribe to null channel!");
+				Logger.log("SOCKET", "attempted to subscribe to null channel!");
 				return;
 			}
+
+			CHANNEL_PERMISSION channelPermission = CHANNEL_PERMISSION.NONE;
+			if (user != null) {
+				channelPermission = user
+						.getPermissionForChannel(subscribeChannel);
+			}
+
+			BrewMessage subscribeResultMessage = new BrewMessage();
+			subscribeResultMessage.setMethod(SOCKET_METHOD.SUBSCRIBE_RESULT);
+			subscribeResultMessage.setChannelPermission(channelPermission);
+			subscribeResultMessage.setChannel(subscribeChannel);
+			sendMessage(subscribeResultMessage);
+
+			if (channelPermission == CHANNEL_PERMISSION.NONE) {
+
+				Logger.log("SOCKET",
+						"no permission for user " + user.getUsername()
+								+ " on channel " + subscribeChannel);
+
+				return;
+			}
+
+			Logger.log("SOCKET", "user " + user.getUsername()
+					+ " subscribed to channel " + subscribeChannel
+					+ " with permission " + channelPermission);
 
 			SocketChannel.get(subscribeChannel).addSocketConnection(this);
 
 			switch (subscribeChannel) {
 
 			case BREW_CONTROL:
-				SensorManager.requestDump(this);
+
+				SensorManager.requestDataDump(this);
+				break;
+
+			case LOG:
+
+				Logger.requestHistoryDump(this);
 				break;
 			}
 
@@ -181,7 +237,7 @@ public class SocketConnection {
 					}
 
 				} catch (IOException e) {
-					e.printStackTrace();
+					Logger.log("ERROR", e.getMessage());
 				}
 
 				// clientSocketListener.onSocketClosed(SocketConnection.this);
@@ -214,6 +270,6 @@ public class SocketConnection {
 			SocketChannel.get(sc).removeSocketConnection(this);
 		}
 		// sockets.remove(socket);
-		System.out.println("socket disconnected: " + socket);
+		Logger.log("SOCKET", "socket disconnected: " + socket);
 	}
 }

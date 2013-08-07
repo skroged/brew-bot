@@ -17,6 +17,9 @@ import com.brew.client.socket.SocketManager;
 import com.brew.client.socket.SocketManager.SocketManagerListener;
 import com.brew.lib.model.BrewData;
 import com.brew.lib.model.BrewMessage;
+import com.brew.lib.model.CHANNEL_PERMISSION;
+import com.brew.lib.model.LogMessage;
+import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.User;
 import com.brew.lib.util.BrewHelper;
@@ -28,6 +31,7 @@ public class RegisterUserActivity extends Activity {
 	private EditText passwordText;
 	private EditText nameText;
 	private Button submitButton;
+	private User user;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +70,7 @@ public class RegisterUserActivity extends Activity {
 				message.setGuaranteeId(UUID.randomUUID().toString());
 				List<User> users = new ArrayList<User>();
 				data.setUsers(users);
-				User user = new User();
+				user = new User();
 				users.add(user);
 				user.setUsername(usernameText.getText().toString());
 				String md5 = BrewHelper.md5(passwordText.getText().toString());
@@ -111,19 +115,21 @@ public class RegisterUserActivity extends Activity {
 		}
 
 		@Override
-		public void onUserRegisterResult(final boolean success) {
+		public void onAuthResult(final boolean success) {
 
 			handler.post(new Runnable() {
 
 				@Override
 				public void run() {
-					
+
 					if (success) {
+
+						BrewDroidUtil.saveUser(RegisterUserActivity.this, user);
 
 						Toast.makeText(RegisterUserActivity.this, "Success!",
 								Toast.LENGTH_SHORT).show();
 						finish();
-						
+
 					} else {
 
 						Toast.makeText(RegisterUserActivity.this,
@@ -133,6 +139,19 @@ public class RegisterUserActivity extends Activity {
 				}
 
 			});
+
+		}
+
+		@Override
+		public void onSubscribeResult(SOCKET_CHANNEL channel,
+				CHANNEL_PERMISSION permission) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onLogReceived(LogMessage logMessage) {
+			// TODO Auto-generated method stub
 
 		}
 

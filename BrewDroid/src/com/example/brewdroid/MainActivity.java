@@ -12,6 +12,9 @@ import android.widget.Toast;
 import com.brew.client.socket.SocketManager;
 import com.brew.client.socket.SocketManager.SocketManagerListener;
 import com.brew.lib.model.BrewData;
+import com.brew.lib.model.CHANNEL_PERMISSION;
+import com.brew.lib.model.LogMessage;
+import com.brew.lib.model.SOCKET_CHANNEL;
 
 public class MainActivity extends Activity {
 
@@ -70,7 +73,7 @@ public class MainActivity extends Activity {
 					}
 
 				});
-		
+
 		findViewById(R.id.registerButton).setOnClickListener(
 				new OnClickListener() {
 
@@ -79,6 +82,34 @@ public class MainActivity extends Activity {
 
 						Intent i = new Intent(MainActivity.this,
 								RegisterUserActivity.class);
+						startActivity(i);
+
+					}
+
+				});
+
+		findViewById(R.id.loginButton).setOnClickListener(
+				new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+
+						Intent i = new Intent(MainActivity.this,
+								LoginUserActivity.class);
+						startActivity(i);
+
+					}
+
+				});
+
+		findViewById(R.id.logButton).setOnClickListener(
+				new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+
+						Intent i = new Intent(MainActivity.this,
+								ServerLogActivity.class);
 						startActivity(i);
 
 					}
@@ -123,9 +154,19 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onConnectFailed() {
-			setButtonText();
-			Toast.makeText(MainActivity.this, "Connect socket failed",
-					Toast.LENGTH_SHORT).show();
+
+			handler.post(new Runnable() {
+
+				@Override
+				public void run() {
+
+					setButtonText();
+
+					Toast.makeText(MainActivity.this, "Connect socket failed",
+							Toast.LENGTH_SHORT).show();
+				}
+
+			});
 
 		}
 
@@ -142,9 +183,22 @@ public class MainActivity extends Activity {
 		}
 
 		@Override
-		public void onUserRegisterResult(boolean success) {
+		public void onAuthResult(boolean success) {
 			// TODO Auto-generated method stub
-			
+
+		}
+
+		@Override
+		public void onSubscribeResult(SOCKET_CHANNEL channel,
+				CHANNEL_PERMISSION permission) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onLogReceived(LogMessage logMessage) {
+			// TODO Auto-generated method stub
+
 		}
 
 	};

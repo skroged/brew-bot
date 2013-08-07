@@ -1,10 +1,29 @@
 package com.brew.lib.model;
 
+import java.util.List;
+
 public class User {
 
+	private int id;
 	private String username;
 	private String password;
 	private String name;
+	private List<UserChannelPermission> permissions;
+
+	public CHANNEL_PERMISSION getPermissionForChannel(SOCKET_CHANNEL channel) {
+
+		if (permissions != null) {
+
+			for (UserChannelPermission permission : permissions) {
+
+				if (permission.getChannel() == channel) {
+					return permission.getPermission();
+				}
+			}
+		}
+
+		return CHANNEL_PERMISSION.NONE;
+	}
 
 	public String getUsername() {
 		return username;
@@ -28,5 +47,21 @@ public class User {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public List<UserChannelPermission> getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(List<UserChannelPermission> permissions) {
+		this.permissions = permissions;
 	}
 }

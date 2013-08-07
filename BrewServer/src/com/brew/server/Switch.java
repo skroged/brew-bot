@@ -26,11 +26,11 @@ public class Switch {
 		Switch hltPump = new Switch();
 		hltPump.name = SWITCH_NAME.HLT_PUMP;
 		switches.put(hltPump.name, hltPump);
-		
+
 		Switch hltBurner = new Switch();
 		hltBurner.name = SWITCH_NAME.HLT_BURNER;
 		switches.put(hltBurner.name, hltBurner);
-		
+
 		Switch hltHlt = new Switch();
 		hltHlt.name = SWITCH_NAME.HLT_HLT;
 		switches.put(hltHlt.name, hltHlt);
@@ -42,11 +42,11 @@ public class Switch {
 		Switch mltPump = new Switch();
 		mltPump.name = SWITCH_NAME.MLT_PUMP;
 		switches.put(mltPump.name, mltPump);
-		
+
 		Switch mltBurner = new Switch();
 		mltBurner.name = SWITCH_NAME.MLT_BURNER;
 		switches.put(mltBurner.name, mltBurner);
-		
+
 		Switch mltMlt = new Switch();
 		mltMlt.name = SWITCH_NAME.MLT_MLT;
 		switches.put(mltMlt.name, mltMlt);
@@ -58,11 +58,11 @@ public class Switch {
 		Switch bkPump = new Switch();
 		bkPump.name = SWITCH_NAME.BK_PUMP;
 		switches.put(bkPump.name, bkPump);
-		
+
 		Switch bkBurner = new Switch();
 		bkBurner.name = SWITCH_NAME.BK_BURNER;
 		switches.put(bkBurner.name, bkBurner);
-		
+
 		Switch bkBk = new Switch();
 		bkBk.name = SWITCH_NAME.BK_BK;
 		switches.put(bkBk.name, bkBk);
@@ -70,7 +70,7 @@ public class Switch {
 		Switch bkFerm = new Switch();
 		bkFerm.name = SWITCH_NAME.BK_FERM;
 		switches.put(bkFerm.name, bkFerm);
-		
+
 		Switch igniter = new Switch();
 		igniter.name = SWITCH_NAME.IGNITER;
 		switches.put(igniter.name, igniter);
@@ -81,15 +81,16 @@ public class Switch {
 	}
 
 	public void setValue(boolean value) {
-		
+
 		boolean changed = value ^ this.value;
-		
-		if (changed)
-			System.out.println("new value for " + name + ": " + value);
-		
+
+		if (changed) {
+			Logger.log("DATA", name + ": " + value);
+		}
+
 		this.value = value;
-		
-		if(changed){
+
+		if (changed) {
 			notifyChanged();
 		}
 	}

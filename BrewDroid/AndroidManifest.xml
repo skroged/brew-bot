@@ -38,6 +38,14 @@
             android:name="com.example.brewdroid.RegisterUserActivity"
             android:label="@string/app_name" >
         </activity>
+         <activity
+            android:name="com.example.brewdroid.LoginUserActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.example.brewdroid.ServerLogActivity"
+            android:label="@string/app_name" >
+        </activity>
         
     </application>
 

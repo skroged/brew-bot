@@ -3,18 +3,14 @@ package com.brew.lib.model;
 public class BrewMessage {
 
 	private SOCKET_METHOD method;
-
 	private ClientIdentifier clientIdentifier;
-
 	private BrewData data;
-
 	private String guaranteeId;
-
 	private String confirmId;
-
 	private SOCKET_CHANNEL channel;
-
 	private Boolean success;
+	private CHANNEL_PERMISSION channelPermission;
+	private LogMessage logMessage;
 
 	public SOCKET_METHOD getMethod() {
 		return method;
@@ -70,6 +66,22 @@ public class BrewMessage {
 
 	public void setSuccess(Boolean success) {
 		this.success = success;
+	}
+
+	public CHANNEL_PERMISSION getChannelPermission() {
+		return channelPermission;
+	}
+
+	public void setChannelPermission(CHANNEL_PERMISSION channelPermission) {
+		this.channelPermission = channelPermission;
+	}
+
+	public LogMessage getLogMessage() {
+		return logMessage;
+	}
+
+	public void setLogMessage(LogMessage logMessage) {
+		this.logMessage = logMessage;
 	}
 
 }

@@ -20,9 +20,13 @@ import android.util.Log;
 
 import com.brew.lib.model.BrewData;
 import com.brew.lib.model.BrewMessage;
-import com.brew.lib.model.ClientIdentifier;
+import com.brew.lib.model.CHANNEL_PERMISSION;
 import com.brew.lib.model.GsonHelper;
+import com.brew.lib.model.LogMessage;
+import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
+import com.brew.lib.model.User;
+import com.example.brewdroid.BrewDroidUtil;
 import com.google.gson.reflect.TypeToken;
 
 public class SocketManager {
@@ -183,6 +187,19 @@ public class SocketManager {
 					socketConnection = new SocketConnection(clientSocket,
 							clientSocketListener);
 
+					User user = BrewDroidUtil.getSavedUser(context);
+
+					BrewMessage loginMessage = new BrewMessage();
+					loginMessage.setMethod(SOCKET_METHOD.LOGIN_USER);
+					BrewData data = new BrewData();
+					loginMessage.setData(data);
+					loginMessage.setGuaranteeId(UUID.randomUUID().toString());
+					List<User> users = new ArrayList<User>();
+					data.setUsers(users);
+					users.add(user);
+
+					SocketManager.sendMessage(loginMessage);
+
 				} catch (IOException e) {
 					Log.i("JOSH", "socket error!");
 					synchronized (socketManagerListeners) {
@@ -235,6 +252,54 @@ public class SocketManager {
 
 			switch (message.getMethod()) {
 
+			case LOG:
+
+				if (message.getLogMessage() == null) {
+					if (message.getSuccess() == null) {
+						Log.i("JOSH", "bad log packet");
+						return;
+					}
+				}
+
+				synchronized (socketManagerListeners) {
+
+					for (SocketManagerListener listener : socketManagerListeners) {
+						listener.onLogReceived(message.getLogMessage());
+					}
+				}
+
+				break;
+
+			case SUBSCRIBE_RESULT:
+
+				SOCKET_CHANNEL channel = message.getChannel();
+				CHANNEL_PERMISSION permission = message.getChannelPermission();
+
+				synchronized (socketManagerListeners) {
+
+					for (SocketManagerListener listener : socketManagerListeners) {
+						listener.onSubscribeResult(channel, permission);
+					}
+				}
+
+				break;
+
+			case LOGIN_RESULT:
+
+				if (message.getSuccess() == null) {
+					Log.i("JOSH", "bad login result packet");
+					return;
+				}
+
+				synchronized (socketManagerListeners) {
+
+					for (SocketManagerListener listener : socketManagerListeners) {
+						listener.onAuthResult(message.getSuccess());
+					}
+				}
+
+				break;
+
 			case REGISTER_RESULT:
 
 				if (message.getSuccess() == null) {
@@ -245,7 +310,7 @@ public class SocketManager {
 				synchronized (socketManagerListeners) {
 
 					for (SocketManagerListener listener : socketManagerListeners) {
-						listener.onUserRegisterResult(message.getSuccess());
+						listener.onAuthResult(message.getSuccess());
 					}
 				}
 
@@ -345,14 +410,11 @@ public class SocketManager {
 
 	}
 
-	public static int getPendingConfirmationCount() {
-		return brewMessageGuarantees.size();
-	}
-
 	private static Map<String, BrewMessageGuarantee> brewMessageGuarantees = new Hashtable<String, BrewMessageGuarantee>();
 
 	private static class BrewMessageGuarantee {
 
+		int confirmWaitCount;
 		private BrewMessage brewMessage;
 		private boolean confirmed;
 		private long start;
@@ -361,9 +423,9 @@ public class SocketManager {
 
 			this.brewMessage = brewMessage;
 
-			brewMessageGuarantees.put(brewMessage.getGuaranteeId(), this);
-
 			start = System.currentTimeMillis();
+
+			brewMessageGuarantees.put(brewMessage.getGuaranteeId(), this);
 
 			if (brewMessage.getMethod() == SOCKET_METHOD.PING) {
 				return;
@@ -373,7 +435,7 @@ public class SocketManager {
 
 				for (SocketManagerListener listener : socketManagerListeners) {
 
-					listener.onConfirmationAction(getPendingConfirmationCount());
+					listener.onConfirmationAction(++confirmWaitCount);
 
 				}
 			}
@@ -393,12 +455,14 @@ public class SocketManager {
 
 			long confirmTime = System.currentTimeMillis() - start;
 
-			Log.i("JOSH", "confirmed in " + confirmTime + " milliseconds");
+			Log.i("JOSH", "confirmed " + brewMessage.getMethod() + " in "
+					+ confirmTime + " milliseconds");
 
-			brewMessageGuarantees.remove(brewMessage.getGuaranteeId());
 			confirmed = true;
 
 			synchronized (socketManagerListeners) {
+
+				brewMessageGuarantees.remove(brewMessage.getGuaranteeId());
 
 				for (SocketManagerListener listener : socketManagerListeners) {
 
@@ -408,7 +472,7 @@ public class SocketManager {
 
 					} else {
 
-						listener.onConfirmationAction(getPendingConfirmationCount());
+						listener.onConfirmationAction(--confirmWaitCount);
 
 					}
 				}
@@ -454,6 +518,9 @@ public class SocketManager {
 
 		public void onConfirmationAction(int pendingConfirmation);
 
+		public void onSubscribeResult(SOCKET_CHANNEL channel,
+				CHANNEL_PERMISSION permission);
+
 		public void onDisconnect();
 
 		public void onConnect();
@@ -464,7 +531,9 @@ public class SocketManager {
 
 		public void onPingReturned(long time);
 
-		public void onUserRegisterResult(boolean success);
+		public void onAuthResult(boolean success);
+
+		public void onLogReceived(LogMessage logMessage);
 	}
 
 	public static interface SocketConnectionListener {
