@@ -1,7 +1,6 @@
 package com.brew.lib.model;
 
 public enum SOCKET_METHOD {
-	// IDENTIFY_CLIENT("identify"), REQUEST_DUMP("dump"),
 	DATA_UPDATE("update"), CONFIRM_MESSAGE("confirm"), SWITCH_UPDATE("switch"), PING(
 			"ping"), SUBSCRIBE("subscribe"), SUBSCRIBE_RESULT("subscribeResult"), UNSUBSCRIBE(
 			"unsubscribe"), REGISTER_USER("register"), LOGIN_USER("login"), REGISTER_RESULT(

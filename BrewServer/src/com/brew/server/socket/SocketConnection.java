@@ -19,27 +19,16 @@ import com.brew.server.db.MySqlManager;
 import com.google.gson.reflect.TypeToken;
 
 public class SocketConnection {
-	// private SocketConnectionListener clientSocketListener;
 	private Socket socket;
 	private PrintWriter out;
 	private BufferedReader in;
 	private User user;
-
-	// private String id;
 
 	public SocketConnection(Socket socket) {
 		this.socket = socket;
 
 		startThread();
 	}
-
-	// public void sendMessage(String message) {
-	// out.println(message);
-	// }
-	//
-	// public void sendMessage(String message) {
-	// out.println(message);
-	// }
 
 	public void sendMessage(final BrewMessage message) {
 
@@ -90,19 +79,9 @@ public class SocketConnection {
 			confirmMessage.setConfirmId(message.getGuaranteeId());
 			sendMessage(confirmMessage);
 
-			// clientSocketListener.onConfirmRequested(this,
-			// message.getGuaranteeId());
 		}
 
 		switch (message.getMethod()) {
-
-		// case IDENTIFY_CLIENT:
-		//
-		// id = message.getClientIdentifier().getId();
-		//
-		// clientSocketListener.onSocketIdentified(this);
-		//
-		// break;
 
 		case LOGIN_USER:
 
@@ -243,7 +222,6 @@ public class SocketConnection {
 					Logger.log("ERROR", e.getMessage());
 				}
 
-				// clientSocketListener.onSocketClosed(SocketConnection.this);
 				cleanupSocket();
 
 			}
@@ -260,19 +238,10 @@ public class SocketConnection {
 
 	}
 
-	// public static interface SocketConnectionListener {
-	// // void onSocketIdentified(SocketConnection socket);
-	//
-	// void onSocketClosed(SocketConnection socket);
-	//
-	// void onConfirmRequested(SocketConnection socket, String confirmId);
-	// }
-
 	private void cleanupSocket() {
 		for (SOCKET_CHANNEL sc : SOCKET_CHANNEL.values()) {
 			SocketChannel.get(sc).removeSocketConnection(this);
 		}
-		// sockets.remove(socket);
 		Logger.log("SOCKET", "socket disconnected: " + socket);
 	}
 }

@@ -198,7 +198,7 @@ public class MySqlManager {
 		try {
 			Statement statement = connection.createStatement();
 
-			boolean hasResults = statement.execute(sql);
+			statement.execute(sql);
 
 		} catch (SQLException e) {
 			Logger.log("ERROR", e.getMessage());

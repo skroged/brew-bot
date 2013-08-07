@@ -10,21 +10,7 @@ import com.brew.lib.model.SOCKET_CHANNEL;
 
 public class SocketChannel {
 
-	// public static enum SOCKET_CHANNEL {
-	//
-	// ALL, BREW_CONTROL, LOG;
-	//
-	// public SocketChannel CHANNEL;
-	//
-	// SOCKET_CHANNEL() {
-	// CHANNEL = new SocketChannel();
-	// }
-	//
-	// }
-
-	private static Map<SOCKET_CHANNEL, SocketChannel> socketChannels;// = new
-																		// Hashtable<SOCKET_CHANNEL,
-																		// SocketChannel>();
+	private static Map<SOCKET_CHANNEL, SocketChannel> socketChannels;
 
 	static {
 
@@ -46,14 +32,6 @@ public class SocketChannel {
 	}
 
 	private List<SocketConnection> sockets = new ArrayList<SocketConnection>();
-
-	// public List<SocketConnection> getSockets() {
-	// return sockets;
-	// }
-
-	// public void setSockets(List<SocketConnection> sockets) {
-	// this.sockets = sockets;
-	// }
 
 	public void removeSocketConnection(SocketConnection socketConnection) {
 		sockets.remove(socketConnection);

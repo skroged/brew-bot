@@ -20,8 +20,6 @@ public class Logger {
 
 	public static void log(String tag, String message) {
 
-		// long timestamp = System.currentTimeMillis();
-
 		System.out.println(tag + "\t" + message);
 
 		BrewMessage brewMessage = new BrewMessage();

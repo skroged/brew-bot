@@ -34,17 +34,9 @@ public class SocketManager {
 	public static String SENSOR_UPDATE_ACTION = "sensorUpdateAction";
 
 	public static final int PORT_NUMBER = 4444;
-	// private static String serverHost = "10.0.3.2";
-	// private static String serverHost = "192.168.0.193";
-
-	// private static String serverHost = "67.162.131.146";
-
-	// private static String serverHost = "skroged.zapto.org";
 
 	private static SocketConnection socketConnection;
 	private static Handler handler;
-	// private static List<SocketConnection> sockets = Collections
-	// .synchronizedList(new ArrayList<SocketConnection>());
 
 	private static SocketConnectionListener clientSocketListener = new SocketConnectionListener() {
 
@@ -84,18 +76,6 @@ public class SocketManager {
 	};
 
 	private static Context context;
-
-	// private static void identify() {
-	//
-	// BrewMessage message = new BrewMessage();
-	// message.setMethod(SOCKET_METHOD.IDENTIFY_CLIENT);
-	// message.setClientIdentifier(new ClientIdentifier(UUID.randomUUID()
-	// .toString()));
-	// message.setGuaranteeId(UUID.randomUUID().toString());
-	//
-	// sendMessage(message);
-	//
-	// }
 
 	public static boolean isConnected() {
 		return socketConnection != null;
