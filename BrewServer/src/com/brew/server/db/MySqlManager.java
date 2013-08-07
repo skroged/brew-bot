@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.brew.lib.model.CHANNEL_PERMISSION;
+import com.brew.lib.model.SENSOR_NAME;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.User;
 import com.brew.lib.model.UserChannelPermission;
 import com.brew.server.Logger;
+import com.brew.server.Sensor;
 import com.mysql.jdbc.Connection;
 
 public class MySqlManager {
@@ -162,6 +164,39 @@ public class MySqlManager {
 
 		return permissions;
 
+	}
+
+	public static Sensor getSensor(SENSOR_NAME sensorName) {
+
+		try {
+			String sql = "SELECT address FROM sensors WHERE name = '"
+					+ sensorName + "';";
+
+			Statement statement = connection.createStatement();
+
+			boolean hasResults = statement.execute(sql);
+
+			if (hasResults) {
+
+				ResultSet results = statement.getResultSet();
+
+				if (results.next()) {
+
+					String address = results.getString("address");
+					
+					Sensor sensor = new Sensor();
+					sensor.setSensorName(sensorName);
+					sensor.setAddress(address);
+					
+					return sensor;
+				}
+			}
+
+		} catch (SQLException e) {
+			Logger.log("ERROR", e.getMessage());
+		}
+
+		return null;
 	}
 
 }

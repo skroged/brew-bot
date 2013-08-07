@@ -8,16 +8,17 @@ import java.util.Collections;
 import java.util.List;
 
 import com.brew.lib.model.SENSOR_NAME;
+import com.brew.server.db.MySqlManager;
 
 public class Sensor {
 
 	public static final String ONE_WIRE_PATH_START = "/sys/bus/w1/devices/";
 	public static final String ONE_WIRE_PATH_END = "/w1_slave";
 
-	public static final String TEMP_1_ID = "28-00000474d694";
+	private String address;// = "28-00000474d694";
 	// private static final long UPDATE_SLEEP = 1000;
 
-	private String sensorId;
+	//private String sensorId;
 	private float value;
 	private SENSOR_NAME sensorName;
 
@@ -31,7 +32,7 @@ public class Sensor {
 
 		try {
 
-			String path = ONE_WIRE_PATH_START + sensorId + ONE_WIRE_PATH_END;
+			String path = ONE_WIRE_PATH_START + address + ONE_WIRE_PATH_END;
 
 			FileReader fileReader = new FileReader(path);
 
@@ -99,9 +100,7 @@ public class Sensor {
 
 		sensors = new ArrayList<Sensor>();
 
-		Sensor sensor = new Sensor();
-		sensor.sensorId = TEMP_1_ID;
-		sensor.sensorName = SENSOR_NAME.HLT_TEMP;
+		Sensor sensor = MySqlManager.getSensor(SENSOR_NAME.HLT_TEMP);
 
 		sensors.add(sensor);
 
@@ -167,6 +166,14 @@ public class Sensor {
 			sensorListeners.add(sensorListener);
 
 		}
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	private static List<SensorListener> sensorListeners = Collections

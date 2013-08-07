@@ -16,11 +16,13 @@ public class Program {
 
 		Logger.log("SYSTEM", "starting server");
 
+		MySqlManager.init();
+		
 		SocketManager.init();
 
 		SensorManager.init();
 
-		MySqlManager.init();
+	
 
 	}
 
