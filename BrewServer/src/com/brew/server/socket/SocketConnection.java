@@ -11,7 +11,9 @@ import com.brew.lib.model.BrewMessage;
 import com.brew.lib.model.GsonHelper;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
+import com.brew.lib.model.User;
 import com.brew.server.SensorManager;
+import com.brew.server.db.MySqlManager;
 import com.google.gson.reflect.TypeToken;
 
 public class SocketConnection {
@@ -19,7 +21,8 @@ public class SocketConnection {
 	private Socket socket;
 	private PrintWriter out;
 	private BufferedReader in;
-//	private String id;
+
+	// private String id;
 
 	public SocketConnection(Socket socket) {
 		this.socket = socket;
@@ -97,12 +100,35 @@ public class SocketConnection {
 		// clientSocketListener.onSocketIdentified(this);
 		//
 		// break;
+		case REGISTER_USER:
+
+			if (message.getData() == null
+					|| message.getData().getUsers() == null
+					|| message.getData().getUsers().size() == 0) {
+				System.out.println("error in register user packet");
+
+				return;
+			}
+
+			for (User user : message.getData().getUsers()) {
+
+				boolean success = MySqlManager.registerUser(user);
+
+				BrewMessage registerResultMessage = new BrewMessage();
+				registerResultMessage.setMethod(SOCKET_METHOD.REGISTER_RESULT);
+				registerResultMessage.setSuccess(success);
+				sendMessage(registerResultMessage);
+			}
+
+			break;
+
 		case UNSUBSCRIBE:
 
 			SOCKET_CHANNEL unsubscribeChannel = message.getChannel();
 
 			if (unsubscribeChannel == null) {
 				System.out.println("attempted to unsubscribe to null channel!");
+				return;
 			}
 
 			SocketChannel.get(unsubscribeChannel).removeSocketConnection(this);
@@ -115,15 +141,17 @@ public class SocketConnection {
 
 			if (subscribeChannel == null) {
 				System.out.println("attempted to subscribe to null channel!");
+				return;
 			}
 
 			SocketChannel.get(subscribeChannel).addSocketConnection(this);
 
-			break;
+			switch (subscribeChannel) {
 
-		case REQUEST_DUMP:
-
-			SensorManager.requestDump(this);
+			case BREW_CONTROL:
+				SensorManager.requestDump(this);
+				break;
+			}
 
 			break;
 

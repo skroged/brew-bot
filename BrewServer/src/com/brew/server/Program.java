@@ -1,5 +1,6 @@
 package com.brew.server;
 
+import com.brew.server.db.MySqlManager;
 import com.brew.server.socket.SocketManager;
 
 public class Program {
@@ -15,6 +16,8 @@ public class Program {
 		SocketManager.init();
 		
 		SensorManager.init();
+		
+		MySqlManager.init();
 	}
 
 }

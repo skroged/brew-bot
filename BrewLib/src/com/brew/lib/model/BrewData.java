@@ -6,6 +6,7 @@ public class BrewData {
 
 	private List<SensorTransport> sensors;
 	private List<SwitchTransport> switches;
+	private List<User> users;
 
 	public List<SensorTransport> getSensors() {
 		return sensors;
@@ -21,6 +22,14 @@ public class BrewData {
 
 	public void setSwitches(List<SwitchTransport> switches) {
 		this.switches = switches;
+	}
+
+	public List<User> getUsers() {
+		return users;
+	}
+
+	public void setUsers(List<User> users) {
+		this.users = users;
 	}
 
 }

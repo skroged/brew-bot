@@ -14,6 +14,8 @@ public class BrewMessage {
 
 	private SOCKET_CHANNEL channel;
 
+	private Boolean success;
+
 	public SOCKET_METHOD getMethod() {
 		return method;
 	}
@@ -60,6 +62,14 @@ public class BrewMessage {
 
 	public void setChannel(SOCKET_CHANNEL channel) {
 		this.channel = channel;
+	}
+
+	public Boolean getSuccess() {
+		return success;
+	}
+
+	public void setSuccess(Boolean success) {
+		this.success = success;
 	}
 
 }

@@ -11,11 +11,13 @@ import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.brew.client.socket.SocketManager;
 import com.brew.client.socket.SocketManager.SocketManagerListener;
 import com.brew.lib.model.BrewData;
 import com.brew.lib.model.BrewMessage;
+import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.SWITCH_NAME;
 import com.brew.lib.model.SensorTransport;
@@ -146,7 +148,7 @@ public class BrewControlActivity extends Activity {
 		igniterButton.setOnClickListener(switchClick);
 
 		findViewById(R.id.progressBar1).setVisibility(View.GONE);
-		
+
 		setAllUnknown();
 
 	}
@@ -292,7 +294,7 @@ public class BrewControlActivity extends Activity {
 
 			});
 
-			requestDump();
+			subscribe();
 		}
 
 		@Override
@@ -492,18 +494,32 @@ public class BrewControlActivity extends Activity {
 		@Override
 		public void onConfirmationAction(final int pendingConfirmation) {
 
-			handler.post(new Runnable(){
+			handler.post(new Runnable() {
 
 				@Override
 				public void run() {
-					
-					int visibility = pendingConfirmation > 0 ? View.VISIBLE : View.GONE;
+
+					int visibility = pendingConfirmation > 0 ? View.VISIBLE
+							: View.GONE;
 
 					findViewById(R.id.progressBar1).setVisibility(visibility);
 				}
-				
+
 			});
-			
+
+		}
+
+		@Override
+		public void onConnectFailed() {
+
+			Toast.makeText(BrewControlActivity.this, "Connect socket failed",
+					Toast.LENGTH_SHORT).show();
+
+		}
+
+		@Override
+		public void onUserRegisterResult(boolean success) {
+			// TODO Auto-generated method stub
 
 		}
 
@@ -523,7 +539,7 @@ public class BrewControlActivity extends Activity {
 
 			startPingLoop();
 
-			requestDump();
+			subscribe();
 
 		} else {
 
@@ -579,12 +595,26 @@ public class BrewControlActivity extends Activity {
 		super.onPause();
 
 		SocketManager.unregisterSocketManagerListener(socketManagerListener);
+
+		unsubscribe();
 	}
 
-	private void requestDump() {
+	private void subscribe() {
 
 		BrewMessage message = new BrewMessage();
-		message.setMethod(SOCKET_METHOD.REQUEST_DUMP);
+		message.setMethod(SOCKET_METHOD.SUBSCRIBE);
+		message.setChannel(SOCKET_CHANNEL.BREW_CONTROL);
+		message.setGuaranteeId(UUID.randomUUID().toString());
+
+		SocketManager.sendMessage(message);
+	}
+
+	private void unsubscribe() {
+
+		BrewMessage message = new BrewMessage();
+		message.setMethod(SOCKET_METHOD.UNSUBSCRIBE);
+		message.setChannel(SOCKET_CHANNEL.BREW_CONTROL);
+		message.setGuaranteeId(UUID.randomUUID().toString());
 
 		SocketManager.sendMessage(message);
 	}

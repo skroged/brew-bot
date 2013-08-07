@@ -46,7 +46,7 @@ public class SocketManager {
 
 		@Override
 		public void onSocketReady(SocketConnection socketConnection) {
-			identify();
+			// identify();
 
 			synchronized (socketManagerListeners) {
 				for (SocketManagerListener listener : socketManagerListeners) {
@@ -67,21 +67,31 @@ public class SocketManager {
 
 		}
 
+		@Override
+		public void onSocketError(SocketConnection socketConnection) {
+			synchronized (socketManagerListeners) {
+
+				for (SocketManagerListener listener : socketManagerListeners) {
+					listener.onConnectFailed();
+				}
+			}
+		}
+
 	};
 
 	private static Context context;
 
-	private static void identify() {
-
-		BrewMessage message = new BrewMessage();
-		message.setMethod(SOCKET_METHOD.IDENTIFY_CLIENT);
-		message.setClientIdentifier(new ClientIdentifier(UUID.randomUUID()
-				.toString()));
-		message.setGuaranteeId(UUID.randomUUID().toString());
-
-		sendMessage(message);
-
-	}
+	// private static void identify() {
+	//
+	// BrewMessage message = new BrewMessage();
+	// message.setMethod(SOCKET_METHOD.IDENTIFY_CLIENT);
+	// message.setClientIdentifier(new ClientIdentifier(UUID.randomUUID()
+	// .toString()));
+	// message.setGuaranteeId(UUID.randomUUID().toString());
+	//
+	// sendMessage(message);
+	//
+	// }
 
 	public static boolean isConnected() {
 		return socketConnection != null;
@@ -100,6 +110,8 @@ public class SocketManager {
 
 	private static boolean looping;
 
+	private static boolean enableConnectionReconnect;
+
 	private static void doConnectionLoop() {
 
 		looping = true;
@@ -108,17 +120,30 @@ public class SocketManager {
 
 			@Override
 			public void run() {
-				doConnectionLoop();
 
-				if (socketConnection == null)
-					connect(context);
+				if (enableConnectionReconnect) {
+					doConnectionLoop();
+
+					if (socketConnection == null)
+						connect(context);
+				}
 
 			}
 
 		}, 3000);
 	}
 
+	public static void disconnect() {
+
+		socketConnection.endThread();
+		socketConnection = null;
+		enableConnectionReconnect = false;
+
+	}
+
 	public static void connect(final Context context) {
+
+		enableConnectionReconnect = true;
 
 		if (!looping)
 			doConnectionLoop();
@@ -160,6 +185,12 @@ public class SocketManager {
 
 				} catch (IOException e) {
 					Log.i("JOSH", "socket error!");
+					synchronized (socketManagerListeners) {
+
+						for (SocketManagerListener listener : socketManagerListeners) {
+							listener.onConnectFailed();
+						}
+					}
 					e.printStackTrace();
 				}
 				super.run();
@@ -204,6 +235,22 @@ public class SocketManager {
 
 			switch (message.getMethod()) {
 
+			case REGISTER_RESULT:
+
+				if (message.getSuccess() == null) {
+					Log.i("JOSH", "bad register result packet");
+					return;
+				}
+
+				synchronized (socketManagerListeners) {
+
+					for (SocketManagerListener listener : socketManagerListeners) {
+						listener.onUserRegisterResult(message.getSuccess());
+					}
+				}
+
+				break;
+
 			case CONFIRM_MESSAGE:
 
 				String confirmId = message.getConfirmId();
@@ -230,6 +277,16 @@ public class SocketManager {
 				break;
 			}
 
+		}
+
+		private void endThread() {
+			try {
+				out.close();
+				in.close();
+				socket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		private void startThread() {
@@ -401,15 +458,21 @@ public class SocketManager {
 
 		public void onConnect();
 
+		public void onConnectFailed();
+
 		public void onData(BrewData brewData);
 
 		public void onPingReturned(long time);
+
+		public void onUserRegisterResult(boolean success);
 	}
 
 	public static interface SocketConnectionListener {
 		public void onSocketReady(SocketConnection socketConnection);
 
 		public void onSocketDisconnected(SocketConnection socketConnection);
+
+		public void onSocketError(SocketConnection socketConnection);
 	}
 
 }

@@ -1,10 +1,10 @@
 package com.brew.lib.model;
 
 public enum SOCKET_METHOD {
-	// IDENTIFY_CLIENT("identify"),
-	DATA_UPDATE("update"), REQUEST_DUMP("dump"), CONFIRM_MESSAGE("confirm"), SWITCH_UPDATE(
-			"switch"), PING("ping"), SUBSCRIBE("subscribe"), UNSUBSCRIBE(
-			"unsubscribe");
+	// IDENTIFY_CLIENT("identify"), REQUEST_DUMP("dump"),
+	DATA_UPDATE("update"), CONFIRM_MESSAGE("confirm"), SWITCH_UPDATE("switch"), PING(
+			"ping"), SUBSCRIBE("subscribe"), UNSUBSCRIBE("unsubscribe"), REGISTER_USER(
+			"register"), REGISTER_RESULT("registerResult");
 
 	String SERVER_STR;
 

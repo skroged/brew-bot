@@ -4,5 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/BrewLib"/>
 	<classpathentry exported="true" kind="lib" path="/BrewLib/libs/gson-2.2.2.jar"/>
+	<classpathentry kind="lib" path="libs/mysql-connector-java-3.0.17-ga-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
