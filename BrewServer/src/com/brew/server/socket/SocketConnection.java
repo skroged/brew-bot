@@ -139,6 +139,9 @@ public class SocketConnection {
 
 			user = MySqlManager.registerUser(registerUser);
 
+			MySqlManager.setPermissionForUser(user.getId(),
+					SOCKET_CHANNEL.BREW_CONTROL, CHANNEL_PERMISSION.READ);
+
 			BrewMessage registerResultMessage = new BrewMessage();
 			registerResultMessage.setMethod(SOCKET_METHOD.REGISTER_RESULT);
 			registerResultMessage.setSuccess(user != null);

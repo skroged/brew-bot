@@ -2,6 +2,7 @@ package com.brew.lib.model;
 
 public class UserChannelPermission {
 
+	private int id;
 	private int userId;
 	private SOCKET_CHANNEL channel;
 	private CHANNEL_PERMISSION permission;
@@ -28,6 +29,14 @@ public class UserChannelPermission {
 
 	public void setPermission(CHANNEL_PERMISSION permission) {
 		this.permission = permission;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 }
