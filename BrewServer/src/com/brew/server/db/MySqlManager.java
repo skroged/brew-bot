@@ -10,10 +10,10 @@ import java.util.List;
 import com.brew.lib.model.CHANNEL_PERMISSION;
 import com.brew.lib.model.SENSOR_NAME;
 import com.brew.lib.model.SOCKET_CHANNEL;
+import com.brew.lib.model.Sensor;
 import com.brew.lib.model.User;
 import com.brew.lib.model.UserChannelPermission;
 import com.brew.server.Logger;
-import com.brew.server.Sensor;
 import com.mysql.jdbc.Connection;
 
 public class MySqlManager {

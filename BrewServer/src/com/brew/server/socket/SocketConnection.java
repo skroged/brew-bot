@@ -13,8 +13,8 @@ import com.brew.lib.model.GsonHelper;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.User;
+import com.brew.server.HardwareManager;
 import com.brew.server.Logger;
-import com.brew.server.SensorManager;
 import com.brew.server.db.MySqlManager;
 import com.google.gson.reflect.TypeToken;
 
@@ -200,7 +200,7 @@ public class SocketConnection {
 
 			case BREW_CONTROL:
 
-				SensorManager.requestDataDump(this);
+				HardwareManager.requestDataDump(this);
 				break;
 
 			case LOG:
@@ -213,7 +213,7 @@ public class SocketConnection {
 
 		case SWITCH_UPDATE:
 
-			SensorManager.receiveUpdate(message);
+			HardwareManager.receiveUpdate(message);
 
 			break;
 		}
