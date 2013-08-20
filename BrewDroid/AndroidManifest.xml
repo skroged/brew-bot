@@ -17,7 +17,8 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.example.brewdroid.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,21 +33,28 @@
         </activity>
         <activity
             android:name="com.example.brewdroid.SettingsActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
         </activity>
-         <activity
+        <activity
             android:name="com.example.brewdroid.RegisterUserActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
         </activity>
-         <activity
+        <activity
             android:name="com.example.brewdroid.LoginUserActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.example.brewdroid.ServerLogActivity"
             android:label="@string/app_name" >
         </activity>
-        
+        <activity
+            android:name="com.example.brewdroid.SensorSettingsActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+        </activity>
     </application>
 
 </manifest>
