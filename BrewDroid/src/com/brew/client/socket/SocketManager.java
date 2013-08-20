@@ -232,6 +232,22 @@ public class SocketManager {
 
 			switch (message.getMethod()) {
 
+			case SENSOR_SETTINGS_UPDATE:
+
+				if (message.getData() == null) {
+					Log.i("JOSH", "bad sensor settings packet");
+					return;
+				}
+
+				synchronized (socketManagerListeners) {
+
+					for (SocketManagerListener listener : socketManagerListeners) {
+						listener.onSensorSettingsReceived(message.getData());
+					}
+				}
+
+				break;
+
 			case LOG:
 
 				if (message.getLogMessage() == null) {
@@ -514,6 +530,8 @@ public class SocketManager {
 		public void onAuthResult(boolean success);
 
 		public void onLogReceived(LogMessage logMessage);
+
+		public void onSensorSettingsReceived(BrewData brewData);
 	}
 
 	public static interface SocketConnectionListener {

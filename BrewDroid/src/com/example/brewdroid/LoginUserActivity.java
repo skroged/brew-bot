@@ -152,6 +152,12 @@ public class LoginUserActivity extends Activity {
 			
 		}
 
+		@Override
+		public void onSensorSettingsReceived(BrewData brewData) {
+			// TODO Auto-generated method stub
+			
+		}
+
 	};
 
 	@Override

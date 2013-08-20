@@ -83,6 +83,24 @@ public class SocketConnection {
 
 		switch (message.getMethod()) {
 
+		case SENSOR_SETTINGS_UPDATE:
+
+			CHANNEL_PERMISSION socketSettingsPermission = CHANNEL_PERMISSION.NONE;
+			if (user != null) {
+				socketSettingsPermission = user
+						.getPermissionForChannel(SOCKET_CHANNEL.SENSOR_SETTINGS);
+			}
+
+			if (socketSettingsPermission == CHANNEL_PERMISSION.READWRITE) {
+				HardwareManager.receiveUpdate(message);
+			} else {
+				Logger.log("AUTHENTICATION",
+						"rejected sensor settings change due to permission level for user "
+								+ user.getUsername());
+			}
+
+			break;
+
 		case LOGIN_USER:
 
 			if (message.getData() == null
@@ -189,13 +207,29 @@ public class SocketConnection {
 
 				Logger.requestHistoryDump(this);
 				break;
+
+			case SENSOR_SETTINGS:
+				HardwareManager.requestSettingsDump(this);
+				break;
 			}
 
 			break;
 
 		case SWITCH_UPDATE:
 
-			HardwareManager.receiveUpdate(message);
+			CHANNEL_PERMISSION switchUpdatePermission = CHANNEL_PERMISSION.NONE;
+			if (user != null) {
+				switchUpdatePermission = user
+						.getPermissionForChannel(SOCKET_CHANNEL.BREW_CONTROL);
+			}
+
+			if (switchUpdatePermission == CHANNEL_PERMISSION.READWRITE) {
+				HardwareManager.receiveUpdate(message);
+			} else {
+				Logger.log("AUTHENTICATION",
+						"rejected switch change due to permission level for user "
+								+ user.getUsername());
+			}
 
 			break;
 		}

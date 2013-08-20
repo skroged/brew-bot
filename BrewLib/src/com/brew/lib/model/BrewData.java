@@ -4,6 +4,7 @@ import java.util.List;
 
 public class BrewData {
 
+	private List<SensorSettingsTransport> sensorSettings;
 	private List<SensorTransport> sensors;
 	private List<SwitchTransport> switches;
 	private List<User> users;
@@ -30,6 +31,14 @@ public class BrewData {
 
 	public void setUsers(List<User> users) {
 		this.users = users;
+	}
+
+	public List<SensorSettingsTransport> getSensorSettings() {
+		return sensorSettings;
+	}
+
+	public void setSensorSettings(List<SensorSettingsTransport> sensorSettings) {
+		this.sensorSettings = sensorSettings;
 	}
 
 }

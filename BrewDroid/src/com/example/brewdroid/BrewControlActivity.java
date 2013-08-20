@@ -1,5 +1,6 @@
 package com.example.brewdroid;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -415,6 +416,9 @@ public class BrewControlActivity extends Activity {
 					}
 					if (brewData.getSensors() != null) {
 
+						NumberFormat nf = NumberFormat.getNumberInstance();
+						nf.setMaximumFractionDigits(2);
+
 						for (SensorTransport st : brewData.getSensors()) {
 
 							boolean setValue = st.getValue() != null;
@@ -424,7 +428,7 @@ public class BrewControlActivity extends Activity {
 							case HLT_TEMP:
 
 								if (setValue) {
-									hltTempText.setText(st.getValue() + " ¡F");
+									hltTempText.setText(nf.format(st.getValue()) + " °F");
 								}
 
 								break;
@@ -432,7 +436,7 @@ public class BrewControlActivity extends Activity {
 							case HLT_VOLUME:
 
 								if (setValue) {
-									hltVolumeText.setText(st.getValue()
+									hltVolumeText.setText(nf.format(st.getValue())
 											+ " Gal");
 								}
 
@@ -441,7 +445,8 @@ public class BrewControlActivity extends Activity {
 							case MLT_TEMP:
 
 								if (setValue) {
-									mltTempText.setText(st.getValue() + " °F");
+									mltTempText.setText(nf.format(st.getValue())
+											+ " °F");
 								}
 
 								break;
@@ -449,7 +454,8 @@ public class BrewControlActivity extends Activity {
 							case BK_TEMP:
 
 								if (setValue) {
-									bkTempText.setText(+st.getValue() + " °F");
+									bkTempText.setText(nf.format(st.getValue())
+											+ " °F");
 								}
 
 								break;
@@ -457,7 +463,7 @@ public class BrewControlActivity extends Activity {
 							case BK_VOLUME:
 
 								if (setValue) {
-									bkTempText.setText(st.getValue() + " Gal");
+									bkTempText.setText(nf.format(st.getValue()) + " Gal");
 								}
 
 								break;
@@ -465,7 +471,7 @@ public class BrewControlActivity extends Activity {
 							case FERM_TEMP:
 
 								if (setValue) {
-									fermTempText.setText(st.getValue() + " °F");
+									fermTempText.setText(nf.format(st.getValue()) + " °F");
 								}
 
 								break;
@@ -550,6 +556,12 @@ public class BrewControlActivity extends Activity {
 
 		@Override
 		public void onLogReceived(LogMessage logMessage) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onSensorSettingsReceived(BrewData brewData) {
 			// TODO Auto-generated method stub
 
 		}

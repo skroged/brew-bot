@@ -102,6 +102,12 @@ public class ServerLogActivity extends Activity {
 
 		}
 
+		@Override
+		public void onSensorSettingsReceived(BrewData brewData) {
+			// TODO Auto-generated method stub
+			
+		}
+
 	};
 
 	private void subscribe() {

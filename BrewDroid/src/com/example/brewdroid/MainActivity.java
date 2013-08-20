@@ -73,6 +73,20 @@ public class MainActivity extends Activity {
 					}
 
 				});
+		
+		findViewById(R.id.sensorSettingsButton).setOnClickListener(
+				new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+
+						Intent i = new Intent(MainActivity.this,
+								SensorSettingsActivity.class);
+						startActivity(i);
+
+					}
+
+				});
 
 		findViewById(R.id.registerButton).setOnClickListener(
 				new OnClickListener() {
@@ -199,6 +213,12 @@ public class MainActivity extends Activity {
 		public void onLogReceived(LogMessage logMessage) {
 			// TODO Auto-generated method stub
 
+		}
+
+		@Override
+		public void onSensorSettingsReceived(BrewData brewData) {
+			// TODO Auto-generated method stub
+			
 		}
 
 	};

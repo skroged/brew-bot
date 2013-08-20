@@ -230,6 +230,7 @@ public class MySqlManager {
 					sensor.setSensorName(sensorName);
 					sensor.setAddress(address);
 					sensor.setCalibration(calibration);
+					sensor.setSensorId(id);
 
 					return sensor;
 				}
@@ -240,6 +241,48 @@ public class MySqlManager {
 		}
 
 		return null;
+	}
+
+	public static void saveSensor(Sensor sensor) {
+
+		Sensor savedSensor = getSensor(sensor.getSensorName());
+		
+		try {
+
+			String sql = "UPDATE sensors SET address = '" + sensor.getAddress()
+					+ "' WHERE idsensors = " + savedSensor.getSensorId() + ";";
+
+			Statement statement = connection.createStatement();
+
+			statement.execute(sql);
+
+		} catch (SQLException e) {
+			Logger.log("ERROR", e.getMessage());
+		}
+
+		saveSensorCalibration(savedSensor.getSensorId(), sensor.getCalibration());
+	}
+
+	private static void saveSensorCalibration(int sensorId,
+			SensorCalibration calibration) {
+
+		try {
+
+			String sql = "UPDATE sensorCalibration SET inputLow = "
+					+ calibration.getInputLow() + ", outputLow = "
+					+ calibration.getOutputLow() + ", inputHigh = "
+					+ calibration.getInputHigh() + ", outputHigh = "
+					+ calibration.getOutputHigh() + " WHERE sensorId = "
+					+ sensorId + ";";
+
+			Statement statement = connection.createStatement();
+
+			statement.execute(sql);
+
+		} catch (SQLException e) {
+			Logger.log("ERROR", e.getMessage());
+		}
+
 	}
 
 	public static SensorCalibration getCalibrationForSensor(int sensorId) {
