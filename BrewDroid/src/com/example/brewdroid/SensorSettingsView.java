@@ -1,5 +1,7 @@
 package com.example.brewdroid;
 
+import java.util.List;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -8,6 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.brew.lib.model.Sensor;
+import com.example.brewdroid.SensorAddressEditDialog.SensorAddressEditDialogListener;
 import com.example.brewdroid.SensorCalibrationEditDialog.SensorCalibrationEditDialogListener;
 
 public class SensorSettingsView extends RelativeLayout {
@@ -21,6 +24,7 @@ public class SensorSettingsView extends RelativeLayout {
 	private TextView outHighText;
 	private TextView addressText;
 	private Sensor sensor;
+	private List<String> oneWireAddresses;
 	private SensorSettingsViewListener sensorSettingsViewListener;
 
 	public SensorSettingsView(Context context) {
@@ -54,6 +58,7 @@ public class SensorSettingsView extends RelativeLayout {
 
 		findViewById(R.id.editLowButton).setOnClickListener(clickListener);
 		findViewById(R.id.editHighButton).setOnClickListener(clickListener);
+		findViewById(R.id.editAddressButton).setOnClickListener(clickListener);
 
 	}
 
@@ -75,7 +80,13 @@ public class SensorSettingsView extends RelativeLayout {
 							public void onSaved(float input, float output) {
 								sensor.getCalibration().setInputLow(input);
 								sensor.getCalibration().setOutputLow(output);
-								sensorSettingsViewListener.onChanged(SensorSettingsView.this);
+								sensorSettingsViewListener
+										.onChanged(SensorSettingsView.this);
+							}
+
+							@Override
+							public float requestCapture() {
+								return sensor.getValue();
 							}
 
 						});
@@ -95,12 +106,43 @@ public class SensorSettingsView extends RelativeLayout {
 							public void onSaved(float input, float output) {
 								sensor.getCalibration().setInputHigh(input);
 								sensor.getCalibration().setOutputHigh(output);
-								sensorSettingsViewListener.onChanged(SensorSettingsView.this);
+								sensorSettingsViewListener
+										.onChanged(SensorSettingsView.this);
+							}
+
+							@Override
+							public float requestCapture() {
+								return sensor.getValue();
 							}
 
 						});
 
 				dialogHigh.show();
+
+				break;
+
+			case R.id.editAddressButton:
+
+				String[] addresses = new String[oneWireAddresses.size()];
+
+				for (int i = 0; i < addresses.length; i++) {
+					addresses[i] = oneWireAddresses.get(i);
+				}
+
+				SensorAddressEditDialog dialogAddress = new SensorAddressEditDialog(
+						getContext(), addresses, sensor.getAddress(),
+						new SensorAddressEditDialogListener() {
+
+							@Override
+							public void onSaved(String address) {
+								sensor.setAddress(address);
+								sensorSettingsViewListener
+										.onChanged(SensorSettingsView.this);
+							}
+
+						});
+
+				dialogAddress.show();
 
 				break;
 			}
@@ -137,6 +179,10 @@ public class SensorSettingsView extends RelativeLayout {
 		rawValueText.setText(sensor.getValue() + "");
 		calibratedValueText.setText(sensor.getCalibratedValue() + "");
 
+	}
+
+	public void setOneWireAddresses(List<String> oneWireAddresses) {
+		this.oneWireAddresses = oneWireAddresses;
 	}
 
 	public Sensor getSensor() {

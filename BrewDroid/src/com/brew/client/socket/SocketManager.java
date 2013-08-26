@@ -232,6 +232,22 @@ public class SocketManager {
 
 			switch (message.getMethod()) {
 
+			case UPDATE_USERS:
+
+				if (message.getData() == null) {
+					Log.i("JOSH", "bad users packet");
+					return;
+				}
+
+				synchronized (socketManagerListeners) {
+
+					for (SocketManagerListener listener : socketManagerListeners) {
+						listener.onUsersReceived(message.getData());
+					}
+				}
+
+				break;
+
 			case SENSOR_SETTINGS_UPDATE:
 
 				if (message.getData() == null) {
@@ -532,6 +548,8 @@ public class SocketManager {
 		public void onLogReceived(LogMessage logMessage);
 
 		public void onSensorSettingsReceived(BrewData brewData);
+
+		public void onUsersReceived(BrewData brewData);
 	}
 
 	public static interface SocketConnectionListener {

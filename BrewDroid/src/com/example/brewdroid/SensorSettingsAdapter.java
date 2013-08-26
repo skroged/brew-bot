@@ -13,6 +13,7 @@ import com.example.brewdroid.SensorSettingsView.SensorSettingsViewListener;
 public class SensorSettingsAdapter extends ArrayAdapter<Sensor> {
 
 	private SensorSettingsAdapterListener sensorSettingsAdapterListener;
+	private List<String> oneWireAddresses;
 
 	public SensorSettingsAdapter(Context context, List<Sensor> objects,
 			SensorSettingsAdapterListener sensorSettingsAdapterListener) {
@@ -36,8 +37,16 @@ public class SensorSettingsAdapter extends ArrayAdapter<Sensor> {
 		}
 
 		ssv.setSensor(sensor);
-
+		ssv.setOneWireAddresses(oneWireAddresses);
 		return ssv;
+	}
+
+	public List<String> getOneWireAddresses() {
+		return oneWireAddresses;
+	}
+
+	public void setOneWireAddresses(List<String> oneWireAddresses) {
+		this.oneWireAddresses = oneWireAddresses;
 	}
 
 	private SensorSettingsViewListener sensorSettingsViewListener = new SensorSettingsViewListener() {

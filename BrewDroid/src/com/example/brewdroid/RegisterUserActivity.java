@@ -161,6 +161,12 @@ public class RegisterUserActivity extends Activity {
 			
 		}
 
+		@Override
+		public void onUsersReceived(BrewData brewData) {
+			// TODO Auto-generated method stub
+			
+		}
+
 	};
 
 	@Override

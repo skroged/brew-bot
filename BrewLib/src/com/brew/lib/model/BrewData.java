@@ -8,6 +8,7 @@ public class BrewData {
 	private List<SensorTransport> sensors;
 	private List<SwitchTransport> switches;
 	private List<User> users;
+	private List<String> oneWireAddresses;
 
 	public List<SensorTransport> getSensors() {
 		return sensors;
@@ -39,6 +40,14 @@ public class BrewData {
 
 	public void setSensorSettings(List<SensorSettingsTransport> sensorSettings) {
 		this.sensorSettings = sensorSettings;
+	}
+
+	public List<String> getOneWireAddresses() {
+		return oneWireAddresses;
+	}
+
+	public void setOneWireAddresses(List<String> oneWireAddresses) {
+		this.oneWireAddresses = oneWireAddresses;
 	}
 
 }

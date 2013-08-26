@@ -73,7 +73,7 @@ public class MainActivity extends Activity {
 					}
 
 				});
-		
+
 		findViewById(R.id.sensorSettingsButton).setOnClickListener(
 				new OnClickListener() {
 
@@ -82,6 +82,20 @@ public class MainActivity extends Activity {
 
 						Intent i = new Intent(MainActivity.this,
 								SensorSettingsActivity.class);
+						startActivity(i);
+
+					}
+
+				});
+
+		findViewById(R.id.userSettingsButton).setOnClickListener(
+				new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+
+						Intent i = new Intent(MainActivity.this,
+								UsersActivity.class);
 						startActivity(i);
 
 					}
@@ -116,19 +130,18 @@ public class MainActivity extends Activity {
 
 				});
 
-		findViewById(R.id.logButton).setOnClickListener(
-				new OnClickListener() {
+		findViewById(R.id.logButton).setOnClickListener(new OnClickListener() {
 
-					@Override
-					public void onClick(View arg0) {
+			@Override
+			public void onClick(View arg0) {
 
-						Intent i = new Intent(MainActivity.this,
-								ServerLogActivity.class);
-						startActivity(i);
+				Intent i = new Intent(MainActivity.this,
+						ServerLogActivity.class);
+				startActivity(i);
 
-					}
+			}
 
-				});
+		});
 
 	}
 
@@ -218,7 +231,13 @@ public class MainActivity extends Activity {
 		@Override
 		public void onSensorSettingsReceived(BrewData brewData) {
 			// TODO Auto-generated method stub
-			
+
+		}
+
+		@Override
+		public void onUsersReceived(BrewData brewData) {
+			// TODO Auto-generated method stub
+
 		}
 
 	};

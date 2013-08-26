@@ -64,7 +64,7 @@ int main(void)
 
 		psi2 = pressureHexCount;//topPart / bottomPart;
 		    
-		cout << "{\"BK_VOLUME\":" << psi1 << ",\"HLT_VOLUME\":" << psi2 << "}" << endl;
+		cout << "{\"spi0\":" << psi1 << ",\"spi1\":" << psi2 << "}" << endl;
 		
 
         i--;

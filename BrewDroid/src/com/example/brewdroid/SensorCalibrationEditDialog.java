@@ -41,6 +41,20 @@ public class SensorCalibrationEditDialog extends AlertDialog {
 
 		setButton(BUTTON_POSITIVE, "OK", clickListener);
 		setButton(BUTTON_NEGATIVE, "Cancel", clickListener);
+
+		v.findViewById(R.id.captureButton).setOnClickListener(
+				new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+
+						float input = SensorCalibrationEditDialog.this.sensorCalibrationEditDialogListener
+								.requestCapture();
+						
+						inputText.setText(input + "");
+
+					}
+				});
 	}
 
 	@Override
@@ -111,5 +125,7 @@ public class SensorCalibrationEditDialog extends AlertDialog {
 
 	public static interface SensorCalibrationEditDialogListener {
 		public void onSaved(float input, float output);
+
+		public float requestCapture();
 	}
 }

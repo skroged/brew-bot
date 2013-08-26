@@ -8,6 +8,8 @@ import java.util.UUID;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ListView;
 
 import com.brew.client.socket.SocketManager;
@@ -42,6 +44,7 @@ public class SensorSettingsActivity extends Activity {
 		adapter = new SensorSettingsAdapter(this, sensors,
 				sensorSettingsAdapterListener);
 		sensorList.setAdapter(adapter);
+
 	}
 
 	private SensorSettingsAdapterListener sensorSettingsAdapterListener = new SensorSettingsAdapterListener() {
@@ -137,6 +140,10 @@ public class SensorSettingsActivity extends Activity {
 		@Override
 		public void onSensorSettingsReceived(BrewData brewData) {
 
+			if (brewData.getOneWireAddresses() != null) {
+				adapter.setOneWireAddresses(brewData.getOneWireAddresses());
+			}
+
 			synchronized (sensors) {
 				for (SensorSettingsTransport sst : brewData.getSensorSettings()) {
 
@@ -167,6 +174,13 @@ public class SensorSettingsActivity extends Activity {
 				}
 
 			});
+
+		}
+
+		@Override
+		public void onUsersReceived(BrewData brewData) {
+			// TODO Auto-generated method stub
+			
 		}
 
 	};

@@ -46,6 +46,52 @@ public class MySqlManager {
 
 	}
 
+	public static List<User> getUsers() {
+
+		List<User> returnList = new ArrayList<User>();
+
+		String sql = "SELECT idusers, username, name FROM users";
+
+		try {
+
+			Statement statement = connection.createStatement();
+
+			boolean hasResults = statement.execute(sql);
+
+			if (hasResults) {
+
+				ResultSet results = statement.getResultSet();
+
+				while (results.next()) {
+
+					User user = new User();
+
+					Logger.log("AUTH", "success");
+
+					int id = results.getInt("idusers");
+					String username = results.getString("username");
+					String name = results.getString("name");
+					List<UserChannelPermission> permissions = getPermissionsForUser(id);
+
+					user.setId(id);
+					user.setUsername(username);
+					user.setPermissions(permissions);
+					user.setName(name);
+
+					returnList.add(user);
+				}
+
+				statement.close();
+				results.close();
+			}
+
+		} catch (SQLException e) {
+			Logger.log("ERROR", e.getMessage());
+		}
+
+		return returnList;
+	}
+
 	public static User registerUser(User user) {
 
 		String name = user.getName() != null ? "'" + user.getName() + "'"
@@ -77,6 +123,34 @@ public class MySqlManager {
 
 		return null;
 
+	}
+
+	public static void updateUser(User user) {
+
+		String sql = "UPDATE users SET name = '' WHERE idusers = "
+				+ user.getId();
+
+		Logger.log("DATA", "updating user: " + user.getUsername());
+
+		try {
+
+			Statement statement = connection.createStatement();
+
+			statement.execute(sql);
+
+			Logger.log("DATA", "success");
+
+			statement.close();
+
+		} catch (SQLException e) {
+			Logger.log("ERROR", e.getMessage());
+		}
+
+		List<UserChannelPermission> perms = user.getPermissions();
+		for (UserChannelPermission perm : perms) {
+			setPermissionForUser(user.getId(), perm.getChannel(),
+					perm.getPermission());
+		}
 	}
 
 	public static User loginUser(User user) {
@@ -179,8 +253,7 @@ public class MySqlManager {
 		boolean exists = false;
 		int existingId = 0;
 		for (UserChannelPermission ucp : permissions) {
-			if (ucp.getChannel() == channel
-					&& ucp.getPermission() == permission) {
+			if (ucp.getChannel() == channel) {
 				exists = true;
 				existingId = ucp.getId();
 				break;
@@ -246,7 +319,7 @@ public class MySqlManager {
 	public static void saveSensor(Sensor sensor) {
 
 		Sensor savedSensor = getSensor(sensor.getSensorName());
-		
+
 		try {
 
 			String sql = "UPDATE sensors SET address = '" + sensor.getAddress()
@@ -260,7 +333,8 @@ public class MySqlManager {
 			Logger.log("ERROR", e.getMessage());
 		}
 
-		saveSensorCalibration(savedSensor.getSensorId(), sensor.getCalibration());
+		saveSensorCalibration(savedSensor.getSensorId(),
+				sensor.getCalibration());
 	}
 
 	private static void saveSensorCalibration(int sensorId,

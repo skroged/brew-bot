@@ -15,6 +15,7 @@ import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.User;
 import com.brew.server.HardwareManager;
 import com.brew.server.Logger;
+import com.brew.server.UserManager;
 import com.brew.server.db.MySqlManager;
 import com.google.gson.reflect.TypeToken;
 
@@ -83,6 +84,36 @@ public class SocketConnection {
 
 		switch (message.getMethod()) {
 
+		case UPDATE_USERS:
+
+			System.out.println("update users");
+			CHANNEL_PERMISSION usersPermission = CHANNEL_PERMISSION.NONE;
+			if (user != null) {
+				usersPermission = user
+						.getPermissionForChannel(SOCKET_CHANNEL.USERS);
+			}
+
+			System.out.println("usersPermission: " + usersPermission);
+
+			if (usersPermission == CHANNEL_PERMISSION.READWRITE) {
+
+				if (message.getData() == null
+						|| message.getData().getUsers() == null
+						|| message.getData().getUsers().size() == 0) {
+					Logger.log("SOCKET", "error in update users packet");
+
+					return;
+				}
+
+				UserManager.receiveUpdate(message);
+			} else {
+				Logger.log("AUTHENTICATION",
+						"rejected users settings change due to permission level for user "
+								+ user.getUsername());
+			}
+
+			break;
+
 		case SENSOR_SETTINGS_UPDATE:
 
 			CHANNEL_PERMISSION socketSettingsPermission = CHANNEL_PERMISSION.NONE;
@@ -144,6 +175,8 @@ public class SocketConnection {
 			registerResultMessage.setSuccess(user != null);
 			sendMessage(registerResultMessage);
 
+			UserManager.notifyUserChanged(user);
+
 			break;
 
 		case UNSUBSCRIBE:
@@ -197,6 +230,12 @@ public class SocketConnection {
 			SocketChannel.get(subscribeChannel).addSocketConnection(this);
 
 			switch (subscribeChannel) {
+
+			case USERS:
+
+				UserManager.requestUserDump(this);
+
+				break;
 
 			case BREW_CONTROL:
 

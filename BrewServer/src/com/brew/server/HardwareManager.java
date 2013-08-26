@@ -1,6 +1,7 @@
 package com.brew.server;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -53,13 +54,13 @@ public class HardwareManager {
 
 		sensors = new ArrayList<Sensor>();
 
-		Sensor sensor1 = MySqlManager.getSensor(SENSOR_NAME.HLT_TEMP);
-		Sensor sensor2 = MySqlManager.getSensor(SENSOR_NAME.BK_VOLUME);
-		Sensor sensor3 = MySqlManager.getSensor(SENSOR_NAME.HLT_VOLUME);
+		sensors.add(MySqlManager.getSensor(SENSOR_NAME.HLT_TEMP));
+		sensors.add(MySqlManager.getSensor(SENSOR_NAME.MLT_TEMP));
+		sensors.add(MySqlManager.getSensor(SENSOR_NAME.BK_TEMP));
+		sensors.add(MySqlManager.getSensor(SENSOR_NAME.FERM_TEMP));
 
-		sensors.add(sensor1);
-		sensors.add(sensor2);
-		sensors.add(sensor3);
+		sensors.add(MySqlManager.getSensor(SENSOR_NAME.BK_VOLUME));
+		sensors.add(MySqlManager.getSensor(SENSOR_NAME.HLT_VOLUME));
 	}
 
 	private static void initSwitches() {
@@ -135,15 +136,16 @@ public class HardwareManager {
 
 							if (sensor.getSensorName() == sst.getSensorName()) {
 
-								Logger.log("SETTINGS", "new settings for " + sensor.getSensorName());
-								
+								Logger.log("SETTINGS", "new settings for "
+										+ sensor.getSensorName());
+
 								sensor.populateFromSettingsTransport(sst, false);
 								// invoke calibration
 								sensor.setValue(sensor.getValue());
 								MySqlManager.saveSensor(sensor);
-								
+
 								notifySensorChanged(sensor);
-								
+
 								break;
 							}
 
@@ -313,6 +315,15 @@ public class HardwareManager {
 
 				data.setSensorSettings(sensorTransports);
 
+				List<String> oneWireAddresses = getOneWireDevices();
+				Logger.log("SETTINGS",
+						"One-Wire devices (" + oneWireAddresses.size() + ")");
+				for (String s : oneWireAddresses) {
+					Logger.log("SETTINGS", s);
+				}
+
+				data.setOneWireAddresses(oneWireAddresses);
+
 				message.setData(data);
 
 				socket.sendMessage(message);
@@ -383,6 +394,14 @@ public class HardwareManager {
 		}
 	}
 
+	/*
+	 * boolean changed = sensor.getValue() != degC;
+	 * 
+	 * if (changed) { Logger.log("DATA", sensor.getSensorName() + ": " + degC);
+	 * }
+	 * 
+	 * if (changed) { sensor.setValue(degC); notifySensorChanged(sensor); }
+	 */
 	public static class UpdateOneWireThread extends Thread {
 		private boolean stopped;
 
@@ -398,13 +417,39 @@ public class HardwareManager {
 
 			while (!stopped) {
 
-				for (Sensor sensor : sensors) {
-					if (sensor.getSensorName() == SENSOR_NAME.BK_TEMP
-							|| sensor.getSensorName() == SENSOR_NAME.HLT_TEMP
-							|| sensor.getSensorName() == SENSOR_NAME.MLT_TEMP
-							|| sensor.getSensorName() == SENSOR_NAME.FERM_TEMP)
-						updateOneWireSensorValue(sensor);
+				List<String> oneWireAddresses = getOneWireDevices();
+
+				for (String address : oneWireAddresses) {
+
+					for (Sensor sensor : sensors) {
+
+						if (sensor.getAddress().equals(address)) {
+
+							float value = readOneWireSensorValue(address);
+
+							boolean changed = Math.abs(sensor.getValue()
+									- value) > 0;
+
+							if (changed) {
+								Logger.log("DATA", sensor.getSensorName()
+										+ ": " + value);
+								notifySensorChanged(sensor);
+								sensor.setValue(value);
+							}
+
+							break;
+						}
+					}
+
 				}
+
+				// for (Sensor sensor : sensors) {
+				// if (sensor.getSensorName() == SENSOR_NAME.BK_TEMP
+				// || sensor.getSensorName() == SENSOR_NAME.HLT_TEMP
+				// || sensor.getSensorName() == SENSOR_NAME.MLT_TEMP
+				// || sensor.getSensorName() == SENSOR_NAME.FERM_TEMP)
+				//
+				// }
 
 			}
 		}
@@ -429,8 +474,8 @@ public class HardwareManager {
 			e.printStackTrace();
 		}
 
-		// updateOneWireThread = new UpdateOneWireThread();
-		// updateOneWireThread.start();
+		updateOneWireThread = new UpdateOneWireThread();
+		updateOneWireThread.start();
 
 		updateSPIThread = new UpdateSPIThread();
 		updateSPIThread.start();
@@ -465,12 +510,28 @@ public class HardwareManager {
 		}
 	}
 
-	public static void updateOneWireSensorValue(Sensor sensor) {
+	private static List<String> getOneWireDevices() {
+
+		List<String> returnList = new ArrayList<String>();
+
+		String path = ONE_WIRE_PATH_START;
+
+		File directory = new File(path);
+		File[] devices = directory.listFiles();
+
+		for (File f : devices) {
+			returnList.add(f.getName());
+		}
+
+		return returnList;
+
+	}
+
+	public static float readOneWireSensorValue(String address) {
 
 		try {
 
-			String path = ONE_WIRE_PATH_START + sensor.getAddress()
-					+ ONE_WIRE_PATH_END;
+			String path = ONE_WIRE_PATH_START + address + ONE_WIRE_PATH_END;
 
 			FileReader fileReader = new FileReader(path);
 
@@ -487,6 +548,8 @@ public class HardwareManager {
 
 			String everything = sb.toString();
 
+			br.close();
+
 			// 2a 00 4b 46 ff ff 0d 10 d1 : crc=d1 YES
 			// 2a 00 4b 46 ff ff 0d 10 d1 t=20937
 
@@ -499,24 +562,9 @@ public class HardwareManager {
 				String tempStr = lines[1].substring(indexOfT + 2);
 
 				try {
-					float degC = Float.valueOf(tempStr);
+					float value = Float.valueOf(tempStr);
 
-					degC /= 1000;
-
-					float degF = (9f / 5f) * degC + 32f;
-
-					boolean changed = sensor.getValue() != degF;
-
-					if (changed) {
-						Logger.log("DATA", sensor.getSensorName() + ": " + degF);
-					}
-
-					if (changed) {
-						notifySensorChanged(sensor);
-					}
-
-					sensor.setValue(degF);
-					// Tf = (9/5)*Tc+32
+					return value;
 
 				} catch (NumberFormatException e) {
 
@@ -527,7 +575,16 @@ public class HardwareManager {
 			br.close();
 		} catch (IOException e) {
 			Logger.log("ERROR", e.getMessage());
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+
 		}
+
+		return 0;
 
 	}
 
@@ -536,16 +593,14 @@ public class HardwareManager {
 		// float area = (float) (64f * Math.PI);
 
 		JsonParser parser = new JsonParser();
-		JsonObject o = (JsonObject) parser.parse(valuesJson);
+		JsonObject jo = (JsonObject) parser.parse(valuesJson);
 
-		Set<Entry<String, JsonElement>> set = o.entrySet();
+		Set<Entry<String, JsonElement>> set = jo.entrySet();
 		Iterator<Entry<String, JsonElement>> iterator = set.iterator();
 		while (iterator.hasNext()) {
 
 			Entry<String, JsonElement> entry = iterator.next();
-			String sensorNameStr = entry.getKey();
-
-			int rawValue = o.getAsJsonPrimitive(sensorNameStr).getAsInt();
+			String sensorAddressStr = entry.getKey();
 
 			// float psi = o.getAsJsonPrimitive(sensorNameStr).getAsFloat();
 
@@ -553,23 +608,29 @@ public class HardwareManager {
 
 			// loat volume =//inchOfWater;// area * inchOfWater * 0.004329f;
 
-			SENSOR_NAME sensorName = SENSOR_NAME.valueOf(sensorNameStr);
+			// try{
+			// SENSOR_NAME sensorName = SENSOR_NAME.valueOf(sensorNameStr);
+			// }
 
 			for (Sensor sensor : sensors) {
 
-				if (sensor.getSensorName() == sensorName) {
+				if (sensor.getAddress().equals(sensorAddressStr)) {
+					// if (sensor.getSensorName() == sensorName) {
+					float rawValue = jo.getAsJsonPrimitive(sensorAddressStr)
+							.getAsFloat();
 
-					boolean changed = Math.abs(sensor.getValue() - rawValue) > 0;
+					// round to nearest 10...
+					int roundedValue = Math.round(rawValue / 10f) * 10;
 
-					float volume = rawValue;
-
+					boolean changed = sensor.getValue() != roundedValue;
 					if (changed) {
 						Logger.log("DATA", sensor.getSensorName() + ": "
-								+ volume);
+								+ roundedValue);
 						notifySensorChanged(sensor);
-						sensor.setValue(volume);
+						sensor.setValue(roundedValue);
 					}
 
+					break;
 				}
 			}
 		}

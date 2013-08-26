@@ -149,11 +149,20 @@
 
     <TextView
         android:id="@+id/addressText"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/editHighButton"
         android:layout_toRightOf="@+id/addressLabel"
         android:text="28-00000474d694"
+        android:textSize="10dp" />
+    
+    <TextView
+        android:id="@+id/editAddressButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editHighButton"
+        android:layout_toRightOf="@+id/outHighText"
+        android:text="Edit"
         android:textSize="10dp" />
 
 </RelativeLayout>

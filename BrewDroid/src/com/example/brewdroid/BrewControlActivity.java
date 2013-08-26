@@ -463,7 +463,7 @@ public class BrewControlActivity extends Activity {
 							case BK_VOLUME:
 
 								if (setValue) {
-									bkTempText.setText(nf.format(st.getValue()) + " Gal");
+									bkVolumeText.setText(nf.format(st.getValue()) + " Gal");
 								}
 
 								break;
@@ -564,6 +564,12 @@ public class BrewControlActivity extends Activity {
 		public void onSensorSettingsReceived(BrewData brewData) {
 			// TODO Auto-generated method stub
 
+		}
+
+		@Override
+		public void onUsersReceived(BrewData brewData) {
+			// TODO Auto-generated method stub
+			
 		}
 
 	};

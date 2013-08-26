@@ -25,6 +25,12 @@ public class User {
 		return CHANNEL_PERMISSION.NONE;
 	}
 
+	public void populateNewSettings(User user) {
+		username = user.username;
+		name = user.name;
+		permissions = user.permissions;
+	}
+
 	public String getUsername() {
 		return username;
 	}
@@ -64,4 +70,5 @@ public class User {
 	public void setPermissions(List<UserChannelPermission> permissions) {
 		this.permissions = permissions;
 	}
+
 }
