@@ -5,6 +5,7 @@ public class Switch {
 
 	private boolean value;
 	private SWITCH_NAME name;
+	private int address;
 
 	public boolean getValue() {
 		return value;
@@ -20,6 +21,14 @@ public class Switch {
 
 	public void setName(SWITCH_NAME name) {
 		this.name = name;
+	}
+
+	public void setAddress(int address){
+		this.address = address;
+	}
+	
+	public int getAddress() {		
+		return address;
 	}
 
 }

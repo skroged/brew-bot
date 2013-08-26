@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -507,7 +508,51 @@ public class HardwareManager {
 
 		if (changed) {
 			notifySwitchChanged(switchh);
+			setSwitchHardware();
 		}
+	}
+
+	private static void setSwitchHardware() {
+
+		new Thread() {
+
+			@Override
+			public void run() {
+
+				BitSet bs = new BitSet(16);
+
+				Iterator<?> it = switches.entrySet().iterator();
+				while (it.hasNext()) {
+
+					SwitchTransport switchTransport = new SwitchTransport();
+
+					Map.Entry<?, ?> pairs = (Map.Entry<?, ?>) it.next();
+
+					Switch switchh = (Switch) pairs.getValue();
+
+					int address = switchh.getAddress();
+					boolean value = switchh.getValue();
+					bs.set(address, value);
+
+				}
+				
+				byte[] bytes = bs.toByteArray();
+				
+				String byte1Str = String.format("%02x", (0xFF & bytes[0]));
+				String byte2Str = String.format("%02x", (0xFF & bytes[1]));
+				
+				try {
+					 Runtime.getRuntime().exec("sudo i2cset -y 1 0x25 " + byte1Str);
+					 Runtime.getRuntime().exec("sudo i2cset -y 1 0x26 " + byte2Str);
+				} catch (IOException e) {					
+					e.printStackTrace();
+				}
+
+				super.run();
+			}
+
+		}.start();
+
 	}
 
 	private static List<String> getOneWireDevices() {
