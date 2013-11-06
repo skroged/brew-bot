@@ -1,5 +1,7 @@
 package com.brew.lib.model;
 
+import java.util.List;
+
 public class BrewMessage {
 
 	private SOCKET_METHOD method;
@@ -11,6 +13,9 @@ public class BrewMessage {
 	private Boolean success;
 	private CHANNEL_PERMISSION channelPermission;
 	private LogMessage logMessage;
+	private ServerInfo serverInfo;
+	private ApkPacket apkPacket;
+	private List<Integer> missingPackets;
 
 	public SOCKET_METHOD getMethod() {
 		return method;
@@ -82,6 +87,30 @@ public class BrewMessage {
 
 	public void setLogMessage(LogMessage logMessage) {
 		this.logMessage = logMessage;
+	}
+
+	public ServerInfo getServerInfo() {
+		return serverInfo;
+	}
+
+	public void setServerInfo(ServerInfo serverInfo) {
+		this.serverInfo = serverInfo;
+	}
+
+	public ApkPacket getApkPacket() {
+		return apkPacket;
+	}
+
+	public void setApkPacket(ApkPacket apkPacket) {
+		this.apkPacket = apkPacket;
+	}
+
+	public void setMissingPackets(List<Integer> missingPackets) {
+		this.missingPackets = missingPackets;
+	}
+
+	public List<Integer> getMissingPackets() {
+		return missingPackets;
 	}
 
 }

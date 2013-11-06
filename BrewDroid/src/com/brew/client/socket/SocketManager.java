@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.util.Log;
 
+import com.brew.lib.model.ApkPacket;
 import com.brew.lib.model.BrewData;
 import com.brew.lib.model.BrewMessage;
 import com.brew.lib.model.CHANNEL_PERMISSION;
@@ -25,6 +26,7 @@ import com.brew.lib.model.GsonHelper;
 import com.brew.lib.model.LogMessage;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
+import com.brew.lib.model.ServerInfo;
 import com.brew.lib.model.User;
 import com.example.brewdroid.BrewDroidUtil;
 import com.google.gson.reflect.TypeToken;
@@ -49,6 +51,11 @@ public class SocketManager {
 					listener.onConnect();
 				}
 			}
+
+			BrewMessage message = new BrewMessage();
+			message.setMethod(SOCKET_METHOD.REQUEST_SERVER_INFO);
+			message.setGuaranteeId(UUID.randomUUID().toString());
+			sendMessage(message);
 		}
 
 		@Override
@@ -217,8 +224,10 @@ public class SocketManager {
 		}
 
 		public void sendMessage(String message) {
-			synchronized (out) {
-				out.println(message);
+			if (out != null) {
+				synchronized (out) {
+					out.println(message);
+				}
 			}
 		}
 
@@ -231,6 +240,33 @@ public class SocketManager {
 					jsonType);
 
 			switch (message.getMethod()) {
+
+			case SEND_ANDROID_APK:
+
+				synchronized (socketManagerListeners) {
+
+					for (SocketManagerListener listener : socketManagerListeners) {
+						listener.onApkPacketReceived(message.getApkPacket());
+					}
+				}
+
+				break;
+
+			case SEND_SERVER_INFO:
+
+				if (message.getServerInfo() == null) {
+					Log.i("JOSH", "bad server info packet");
+					return;
+				}
+
+				synchronized (socketManagerListeners) {
+
+					for (SocketManagerListener listener : socketManagerListeners) {
+						listener.onServerInfoReceived(message.getServerInfo());
+					}
+				}
+
+				break;
 
 			case UPDATE_USERS:
 
@@ -550,6 +586,10 @@ public class SocketManager {
 		public void onSensorSettingsReceived(BrewData brewData);
 
 		public void onUsersReceived(BrewData brewData);
+
+		public void onServerInfoReceived(ServerInfo info);
+
+		public void onApkPacketReceived(ApkPacket packet);
 	}
 
 	public static interface SocketConnectionListener {

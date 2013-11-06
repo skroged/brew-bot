@@ -12,12 +12,14 @@ import android.widget.ListView;
 
 import com.brew.client.socket.SocketManager;
 import com.brew.client.socket.SocketManager.SocketManagerListener;
+import com.brew.lib.model.ApkPacket;
 import com.brew.lib.model.BrewData;
 import com.brew.lib.model.BrewMessage;
 import com.brew.lib.model.CHANNEL_PERMISSION;
 import com.brew.lib.model.LogMessage;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
+import com.brew.lib.model.ServerInfo;
 import com.brew.lib.model.User;
 
 public class UsersActivity extends Activity {
@@ -131,6 +133,18 @@ public class UsersActivity extends Activity {
 
 			});
 
+		}
+
+		@Override
+		public void onServerInfoReceived(ServerInfo info) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onApkPacketReceived(ApkPacket packet) {
+			// TODO Auto-generated method stub
+			
 		}
 
 	};

@@ -1,8 +1,8 @@
 package com.brew.lib.model;
 
-
 public class Switch {
 
+	private int id;
 	private boolean value;
 	private SWITCH_NAME name;
 	private int address;
@@ -23,12 +23,20 @@ public class Switch {
 		this.name = name;
 	}
 
-	public void setAddress(int address){
+	public void setAddress(int address) {
 		this.address = address;
 	}
-	
-	public int getAddress() {		
+
+	public int getAddress() {
 		return address;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 }

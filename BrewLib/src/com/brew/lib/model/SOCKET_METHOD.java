@@ -6,7 +6,9 @@ public enum SOCKET_METHOD {
 			"subscribe"), SUBSCRIBE_RESULT("subscribeResult"), UNSUBSCRIBE(
 			"unsubscribe"), REGISTER_USER("register"), LOGIN_USER("login"), REGISTER_RESULT(
 			"registerResult"), LOGIN_RESULT("loginResult"), LOG("log"), UPDATE_USERS(
-			"updateUsers");
+			"updateUsers"), REQUEST_SERVER_INFO("requestServerInfo"), SEND_SERVER_INFO(
+			"sendServerInfo"), REQUEST_ANDROID_APK("requestApk"), SEND_ANDROID_APK(
+			"sendApk");
 
 	String SERVER_STR;
 

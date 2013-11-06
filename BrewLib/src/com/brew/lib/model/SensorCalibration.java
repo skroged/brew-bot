@@ -7,7 +7,7 @@ public class SensorCalibration {
 	private float outputLow;
 	private float outputHigh;
 	private float slope;
-	private float intercept;
+	private float x0;
 	private boolean calculatedEqution;
 
 	public float getInputLow() {
@@ -42,20 +42,26 @@ public class SensorCalibration {
 		this.outputHigh = outputHigh;
 	}
 
+	public void resetEquation() {
+		calculatedEqution = false;
+	}
+
 	public float transpose(float input) {
 
 		if (!calculatedEqution) {
 
-			float rise = outputHigh - outputLow;
-			float run = inputHigh - outputLow;
+			float dy = outputHigh - outputLow;
+			float dx = inputHigh - outputLow;
 
-			slope = rise / run;
+			slope = dy / dx;
 
-			intercept = outputLow - inputLow * slope;
+			x0 = outputLow - inputLow * slope;
+			
+			calculatedEqution = true;
 
 		}
 
-		return input * slope + intercept;
+		return input * slope + x0;
 	}
 
 }

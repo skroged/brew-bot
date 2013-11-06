@@ -6,16 +6,19 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.net.Socket;
+import java.net.SocketException;
 
 import com.brew.lib.model.BrewMessage;
 import com.brew.lib.model.CHANNEL_PERMISSION;
 import com.brew.lib.model.GsonHelper;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
+import com.brew.lib.model.ServerInfo;
 import com.brew.lib.model.User;
 import com.brew.server.HardwareManager;
 import com.brew.server.Logger;
 import com.brew.server.UserManager;
+import com.brew.server.Util;
 import com.brew.server.db.MySqlManager;
 import com.google.gson.reflect.TypeToken;
 
@@ -76,13 +79,41 @@ public class SocketConnection {
 		if (message.getGuaranteeId() != null) {
 
 			BrewMessage confirmMessage = new BrewMessage();
+			confirmMessage.setMethod(SOCKET_METHOD.SEND_SERVER_INFO);
 			confirmMessage.setMethod(SOCKET_METHOD.CONFIRM_MESSAGE);
 			confirmMessage.setConfirmId(message.getGuaranteeId());
 			sendMessage(confirmMessage);
 
 		}
 
-		switch (message.getMethod()) {
+		switch (message.getMethod()) { 
+
+		case REQUEST_ANDROID_APK:
+
+			try {
+				Util.sendApkFile(this, socket.getSendBufferSize(),
+						message.getMissingPackets());
+			} catch (SocketException e) {
+				Logger.log("ERROR", e.getMessage());
+			}
+
+			break; 
+
+		case REQUEST_SERVER_INFO:
+
+			Logger.log("SOCKET", "received server info request");
+
+			BrewMessage sendServerInfoMessage = new BrewMessage();
+			sendServerInfoMessage.setMethod(SOCKET_METHOD.SEND_SERVER_INFO);
+			ServerInfo serverInfo = Util.getServerInfo();
+			sendServerInfoMessage.setServerInfo(serverInfo);
+			sendMessage(sendServerInfoMessage);
+
+			// String json = GsonHelper.getGson().toJson(sendServerInfoMessage);
+			//
+			// System.out.println(json);
+			//
+			break;
 
 		case UPDATE_USERS:
 

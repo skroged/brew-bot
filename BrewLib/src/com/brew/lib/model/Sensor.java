@@ -16,11 +16,6 @@ public class Sensor {
 	public void populateFromSettingsTransport(
 			SensorSettingsTransport transport, boolean applyValue) {
 
-		if (applyValue) {
-			value = transport.getValue();
-			calibratedValue = transport.getCalibratedValue();
-		}
-
 		address = transport.getAddress();
 		sensorName = transport.getSensorName();
 		calibration = new SensorCalibration();
@@ -29,6 +24,12 @@ public class Sensor {
 		calibration.setOutputHigh(transport.getOutputHigh());
 		calibration.setOutputLow(transport.getOutputLow());
 
+		calibration.resetEquation();
+		
+		if (applyValue) {
+			value = transport.getValue();
+			calibratedValue = transport.getCalibratedValue();
+		}
 	}
 
 	public void populateFromSettingsTransport(SensorSettingsTransport transport) {

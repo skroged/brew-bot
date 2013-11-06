@@ -55,69 +55,78 @@ public class HardwareManager {
 
 		sensors = new ArrayList<Sensor>();
 
-		sensors.add(MySqlManager.getSensor(SENSOR_NAME.HLT_TEMP));
-		sensors.add(MySqlManager.getSensor(SENSOR_NAME.MLT_TEMP));
-		sensors.add(MySqlManager.getSensor(SENSOR_NAME.BK_TEMP));
-		sensors.add(MySqlManager.getSensor(SENSOR_NAME.FERM_TEMP));
+		for (SENSOR_NAME sn : SENSOR_NAME.values()) {
+			sensors.add(MySqlManager.getSensor(sn));
+		}
 
-		sensors.add(MySqlManager.getSensor(SENSOR_NAME.BK_VOLUME));
-		sensors.add(MySqlManager.getSensor(SENSOR_NAME.HLT_VOLUME));
+		// sensors.add(MySqlManager.getSensor(SENSOR_NAME.HLT_TEMP));
+		// sensors.add(MySqlManager.getSensor(SENSOR_NAME.MLT_TEMP));
+		// sensors.add(MySqlManager.getSensor(SENSOR_NAME.BK_TEMP));
+		// sensors.add(MySqlManager.getSensor(SENSOR_NAME.FERM_TEMP));
+		//
+		// sensors.add(MySqlManager.getSensor(SENSOR_NAME.BK_VOLUME));
+		// sensors.add(MySqlManager.getSensor(SENSOR_NAME.HLT_VOLUME));
 	}
 
 	private static void initSwitches() {
 		switches = new Hashtable<SWITCH_NAME, Switch>();
 
-		Switch hltPump = new Switch();
-		hltPump.setName(SWITCH_NAME.HLT_PUMP);
-		switches.put(hltPump.getName(), hltPump);
+		for (SWITCH_NAME sn : SWITCH_NAME.values()) {
+			Switch switchh = MySqlManager.getSwitch(sn);
+			switches.put(switchh.getName(), switchh);
+		}
 
-		Switch hltBurner = new Switch();
-		hltBurner.setName(SWITCH_NAME.HLT_BURNER);
-		switches.put(hltBurner.getName(), hltBurner);
-
-		Switch hltHlt = new Switch();
-		hltHlt.setName(SWITCH_NAME.HLT_HLT);
-		switches.put(hltHlt.getName(), hltHlt);
-
-		Switch hltMlt = new Switch();
-		hltMlt.setName(SWITCH_NAME.HLT_MLT);
-		switches.put(hltMlt.getName(), hltMlt);
-
-		Switch mltPump = new Switch();
-		mltPump.setName(SWITCH_NAME.MLT_PUMP);
-		switches.put(mltPump.getName(), mltPump);
-
-		Switch mltBurner = new Switch();
-		mltBurner.setName(SWITCH_NAME.MLT_BURNER);
-		switches.put(mltBurner.getName(), mltBurner);
-
-		Switch mltMlt = new Switch();
-		mltMlt.setName(SWITCH_NAME.MLT_MLT);
-		switches.put(mltMlt.getName(), mltMlt);
-
-		Switch mltBk = new Switch();
-		mltBk.setName(SWITCH_NAME.MLT_BK);
-		switches.put(mltBk.getName(), mltBk);
-
-		Switch bkPump = new Switch();
-		bkPump.setName(SWITCH_NAME.BK_PUMP);
-		switches.put(bkPump.getName(), bkPump);
-
-		Switch bkBurner = new Switch();
-		bkBurner.setName(SWITCH_NAME.BK_BURNER);
-		switches.put(bkBurner.getName(), bkBurner);
-
-		Switch bkBk = new Switch();
-		bkBk.setName(SWITCH_NAME.BK_BK);
-		switches.put(bkBk.getName(), bkBk);
-
-		Switch bkFerm = new Switch();
-		bkFerm.setName(SWITCH_NAME.BK_FERM);
-		switches.put(bkFerm.getName(), bkFerm);
-
-		Switch igniter = new Switch();
-		igniter.setName(SWITCH_NAME.IGNITER);
-		switches.put(igniter.getName(), igniter);
+		// Switch hltPump = new Switch();
+		// hltPump.setName(SWITCH_NAME.HLT_PUMP);
+		// switches.put(hltPump.getName(), hltPump);
+		//
+		// Switch hltBurner = new Switch();
+		// hltBurner.setName(SWITCH_NAME.HLT_BURNER);
+		// switches.put(hltBurner.getName(), hltBurner);
+		//
+		// Switch hltHlt = new Switch();
+		// hltHlt.setName(SWITCH_NAME.HLT_HLT);
+		// switches.put(hltHlt.getName(), hltHlt);
+		//
+		// Switch hltMlt = new Switch();
+		// hltMlt.setName(SWITCH_NAME.HLT_MLT);
+		// switches.put(hltMlt.getName(), hltMlt);
+		//
+		// Switch mltPump = new Switch();
+		// mltPump.setName(SWITCH_NAME.MLT_PUMP);
+		// switches.put(mltPump.getName(), mltPump);
+		//
+		// Switch mltBurner = new Switch();
+		// mltBurner.setName(SWITCH_NAME.MLT_BURNER);
+		// switches.put(mltBurner.getName(), mltBurner);
+		//
+		// Switch mltMlt = new Switch();
+		// mltMlt.setName(SWITCH_NAME.MLT_MLT);
+		// switches.put(mltMlt.getName(), mltMlt);
+		//
+		// Switch mltBk = new Switch();
+		// mltBk.setName(SWITCH_NAME.MLT_BK);
+		// switches.put(mltBk.getName(), mltBk);
+		//
+		// Switch bkPump = new Switch();
+		// bkPump.setName(SWITCH_NAME.BK_PUMP);
+		// switches.put(bkPump.getName(), bkPump);
+		//
+		// Switch bkBurner = new Switch();
+		// bkBurner.setName(SWITCH_NAME.BK_BURNER);
+		// switches.put(bkBurner.getName(), bkBurner);
+		//
+		// Switch bkBk = new Switch();
+		// bkBk.setName(SWITCH_NAME.BK_BK);
+		// switches.put(bkBk.getName(), bkBk);
+		//
+		// Switch bkFerm = new Switch();
+		// bkFerm.setName(SWITCH_NAME.BK_FERM);
+		// switches.put(bkFerm.getName(), bkFerm);
+		//
+		// Switch igniter = new Switch();
+		// igniter.setName(SWITCH_NAME.IGNITER);
+		// switches.put(igniter.getName(), igniter);
 	}
 
 	public static void receiveUpdate(BrewMessage message) {
@@ -519,8 +528,8 @@ public class HardwareManager {
 			@Override
 			public void run() {
 
-				BitSet bs = new BitSet(16);
-
+				// BitSet bs = new BitSet(16);
+				int bits = 0xffff;
 				Iterator<?> it = switches.entrySet().iterator();
 				while (it.hasNext()) {
 
@@ -531,20 +540,42 @@ public class HardwareManager {
 					Switch switchh = (Switch) pairs.getValue();
 
 					int address = switchh.getAddress();
-					boolean value = switchh.getValue();
-					bs.set(address, value);
+					// int value = switchh.getValue() ? 0 : 1;
+
+					if (switchh.getValue()) {
+						bits &= ~(1 << address);
+					} else {
+						bits |= (1 << address);
+					}
+
+					// value <<= 8;
+					// value &= 0xff;
+
+					// bits &= (value << address);
+
+					// bs.set(address, value);
 
 				}
-				
-				byte[] bytes = bs.toByteArray();
-				
-				String byte1Str = String.format("%02x", (0xFF & bytes[0]));
-				String byte2Str = String.format("%02x", (0xFF & bytes[1]));
-				
+
+			//	System.out.println("bits: " + bits);
+
+				byte lowByte = (byte) (bits & 0xff);
+				byte hiByte = (byte) ((bits & 0xff00) >> 8);
+
+				String byte1Str = String.format("0x%x", lowByte);
+				String byte2Str = String.format("0x%x", hiByte);
+
 				try {
-					 Runtime.getRuntime().exec("sudo i2cset -y 1 0x25 " + byte1Str);
-					 Runtime.getRuntime().exec("sudo i2cset -y 1 0x26 " + byte2Str);
-				} catch (IOException e) {					
+					Runtime.getRuntime().exec(
+							"sudo i2cset -y 1 0x25 " + byte1Str);
+
+					Runtime.getRuntime().exec(
+							"sudo i2cset -y 1 0x26 " + byte2Str);
+
+					// System.out.println("sudo i2cset -y 1 0x25 " + byte1Str);
+					// System.out.println("sudo i2cset -y 1 0x26 " + byte2Str);
+
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 

@@ -10,8 +10,10 @@ import java.util.List;
 import com.brew.lib.model.CHANNEL_PERMISSION;
 import com.brew.lib.model.SENSOR_NAME;
 import com.brew.lib.model.SOCKET_CHANNEL;
+import com.brew.lib.model.SWITCH_NAME;
 import com.brew.lib.model.Sensor;
 import com.brew.lib.model.SensorCalibration;
+import com.brew.lib.model.Switch;
 import com.brew.lib.model.User;
 import com.brew.lib.model.UserChannelPermission;
 import com.brew.server.Logger;
@@ -277,6 +279,41 @@ public class MySqlManager {
 			Logger.log("ERROR", e.getMessage());
 		}
 
+	}
+
+	public static Switch getSwitch(SWITCH_NAME switchName) {
+
+		try {
+			String sql = "SELECT idswitches, address FROM switches WHERE name = '"
+					+ switchName + "';";
+
+			Statement statement = connection.createStatement();
+
+			boolean hasResults = statement.execute(sql);
+
+			if (hasResults) {
+
+				ResultSet results = statement.getResultSet();
+
+				if (results.next()) {
+
+					int address = results.getInt("address");
+					int id = results.getInt("idswitches");
+
+					Switch switchh = new Switch();
+					switchh.setName(switchName);
+					switchh.setAddress(address);
+					switchh.setId(id);
+
+					return switchh;
+				}
+			}
+
+		} catch (SQLException e) {
+			Logger.log("ERROR", e.getMessage());
+		}
+
+		return null;
 	}
 
 	public static Sensor getSensor(SENSOR_NAME sensorName) {
