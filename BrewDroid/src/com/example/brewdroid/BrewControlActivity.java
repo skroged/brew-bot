@@ -1,12 +1,13 @@
 package com.example.brewdroid;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import android.app.Activity;
+import android.database.ContentObserver;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -25,7 +26,6 @@ import com.brew.lib.model.LogMessage;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.SWITCH_NAME;
-import com.brew.lib.model.SensorTransport;
 import com.brew.lib.model.ServerInfo;
 import com.brew.lib.model.SwitchTransport;
 
@@ -418,67 +418,70 @@ public class BrewControlActivity extends Activity {
 					}
 					if (brewData.getSensors() != null) {
 
-						NumberFormat nf = NumberFormat.getNumberInstance();
-						nf.setMaximumFractionDigits(2);
-
-						for (SensorTransport st : brewData.getSensors()) {
-
-							boolean setValue = st.getValue() != null;
-
-							switch (st.getSensorName()) {
-
-							case HLT_TEMP:
-
-								if (setValue) {
-									hltTempText.setText(nf.format(st.getValue()) + " °F");
-								}
-
-								break;
-
-							case HLT_VOLUME:
-
-								if (setValue) {
-									hltVolumeText.setText(nf.format(st.getValue())
-											+ " Gal");
-								}
-
-								break;
-
-							case MLT_TEMP:
-
-								if (setValue) {
-									mltTempText.setText(nf.format(st.getValue())
-											+ " °F");
-								}
-
-								break;
-
-							case BK_TEMP:
-
-								if (setValue) {
-									bkTempText.setText(nf.format(st.getValue())
-											+ " °F");
-								}
-
-								break;
-
-							case BK_VOLUME:
-
-								if (setValue) {
-									bkVolumeText.setText(nf.format(st.getValue()) + " Gal");
-								}
-
-								break;
-
-							case FERM_TEMP:
-
-								if (setValue) {
-									fermTempText.setText(nf.format(st.getValue()) + " °F");
-								}
-
-								break;
-							}
-						}
+						// NumberFormat nf = NumberFormat.getNumberInstance();
+						// nf.setMaximumFractionDigits(2);
+						//
+						// for (SensorTransport st : brewData.getSensors()) {
+						//
+						// boolean setValue = st.getValue() != null;
+						//
+						// switch (st.getSensorName()) {
+						//
+						// case HLT_TEMP:
+						//
+						// if (setValue) {
+						// hltTempText.setText(nf.format(st.getValue()) +
+						// " °F");
+						// }
+						//
+						// break;
+						//
+						// case HLT_VOLUME:
+						//
+						// if (setValue) {
+						// hltVolumeText.setText(nf.format(st.getValue())
+						// + " Gal");
+						// }
+						//
+						// break;
+						//
+						// case MLT_TEMP:
+						//
+						// if (setValue) {
+						// mltTempText.setText(nf.format(st.getValue())
+						// + " °F");
+						// }
+						//
+						// break;
+						//
+						// case BK_TEMP:
+						//
+						// if (setValue) {
+						// bkTempText.setText(nf.format(st.getValue())
+						// + " °F");
+						// }
+						//
+						// break;
+						//
+						// case BK_VOLUME:
+						//
+						// if (setValue) {
+						// bkVolumeText.setText(nf.format(st.getValue()) +
+						// " Gal");
+						// }
+						//
+						// break;
+						//
+						// case FERM_TEMP:
+						//
+						// if (setValue) {
+						// fermTempText.setText(nf.format(st.getValue()) +
+						// " °F");
+						// }
+						//
+						// break;
+						// }
+						// }
 
 					}
 
@@ -571,19 +574,29 @@ public class BrewControlActivity extends Activity {
 		@Override
 		public void onUsersReceived(BrewData brewData) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void onServerInfoReceived(ServerInfo info) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void onApkPacketReceived(ApkPacket packet) {
 			// TODO Auto-generated method stub
-			
+
+		}
+
+	};
+
+	private ContentObserver sensorObserver = new ContentObserver(handler) {
+
+		@Override
+		public void onChange(boolean selfChange, Uri uri) {
+
+			super.onChange(selfChange, uri);
 		}
 
 	};

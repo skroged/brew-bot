@@ -5,17 +5,18 @@ import java.util.List;
 public class BrewData {
 
 	private List<SensorSettingsTransport> sensorSettings;
-	private List<SensorTransport> sensors;
+	private List<SensorTransport> sensorTransports;
+	private List<Sensor> sensors;
 	private List<SwitchTransport> switches;
 	private List<User> users;
 	private List<String> oneWireAddresses;
 
-	public List<SensorTransport> getSensors() {
-		return sensors;
+	public List<SensorTransport> getSensorTransports() {
+		return sensorTransports;
 	}
 
-	public void setSensors(List<SensorTransport> sensors) {
-		this.sensors = sensors;
+	public void setSensorTransports(List<SensorTransport> sensorTransports) {
+		this.sensorTransports = sensorTransports;
 	}
 
 	public List<SwitchTransport> getSwitches() {
@@ -48,6 +49,14 @@ public class BrewData {
 
 	public void setOneWireAddresses(List<String> oneWireAddresses) {
 		this.oneWireAddresses = oneWireAddresses;
+	}
+
+	public List<Sensor> getSensors() {
+		return sensors;
+	}
+
+	public void setSensors(List<Sensor> sensors) {
+		this.sensors = sensors;
 	}
 
 }

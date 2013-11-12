@@ -258,17 +258,17 @@ public class HardwareManager {
 
 				List<SensorTransport> sensorTransports = new ArrayList<SensorTransport>();
 
-				for (Sensor sensor : sensors) {
+				// for (Sensor sensor : sensors) {
+				//
+				// SensorTransport sensorTransport = new SensorTransport();
+				//
+				// sensorTransport.setValue(sensor.getCalibratedValue());
+				// sensorTransport.setSensorId(sensor.getSensorId());
+				//
+				// sensorTransports.add(sensorTransport);
+				// }
 
-					SensorTransport sensorTransport = new SensorTransport();
-
-					sensorTransport.setValue(sensor.getCalibratedValue());
-					sensorTransport.setSensorName(sensor.getSensorName());
-
-					sensorTransports.add(sensorTransport);
-				}
-
-				data.setSensors(sensorTransports);
+				data.setSensors(sensors);
 
 				List<SwitchTransport> switchTransports = new ArrayList<SwitchTransport>();
 				Iterator<?> it = switches.entrySet().iterator();
