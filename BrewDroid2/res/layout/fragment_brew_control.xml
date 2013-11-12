@@ -50,7 +50,7 @@
                     android:layout_gravity="center_horizontal"
                     android:padding="3dp" >
 
-                    <com.example.brewdroid.OnOffIndicator
+                    <com.brew.brewdroid.OnOffIndicator
                         android:id="@+id/bkBurnerIndicator"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
@@ -71,7 +71,7 @@
                     android:layout_gravity="center_horizontal"
                     android:padding="3dp" >
 
-                    <com.example.brewdroid.OnOffIndicator
+                    <com.brew.brewdroid.OnOffIndicator
                         android:id="@+id/bkPumpIndicator"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
@@ -95,7 +95,7 @@
                         android:layout_height="25dp"
                         android:padding="3dp" >
 
-                        <com.example.brewdroid.OnOffIndicator
+                        <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/bkFermIndicator"
                             android:layout_width="fill_parent"
                             android:layout_height="fill_parent"
@@ -115,7 +115,7 @@
                         android:layout_height="25dp"
                         android:padding="3dp" >
 
-                        <com.example.brewdroid.OnOffIndicator
+                        <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/bkBkIndicator"
                             android:layout_width="fill_parent"
                             android:layout_height="fill_parent"
@@ -165,7 +165,7 @@
                     android:layout_gravity="center_horizontal"
                     android:padding="3dp" >
 
-                    <com.example.brewdroid.OnOffIndicator
+                    <com.brew.brewdroid.OnOffIndicator
                         android:id="@+id/mltBurnerIndicator"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
@@ -186,7 +186,7 @@
                     android:layout_gravity="center_horizontal"
                     android:padding="3dp" >
 
-                    <com.example.brewdroid.OnOffIndicator
+                    <com.brew.brewdroid.OnOffIndicator
                         android:id="@+id/mltPumpIndicator"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
@@ -210,7 +210,7 @@
                         android:layout_height="25dp"
                         android:padding="3dp" >
 
-                        <com.example.brewdroid.OnOffIndicator
+                        <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/mltBkIndicator"
                             android:layout_width="fill_parent"
                             android:layout_height="fill_parent"
@@ -230,7 +230,7 @@
                         android:layout_height="25dp"
                         android:padding="3dp" >
 
-                        <com.example.brewdroid.OnOffIndicator
+                        <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/mltMltIndicator"
                             android:layout_width="fill_parent"
                             android:layout_height="fill_parent"
@@ -280,7 +280,7 @@
                     android:layout_gravity="center_horizontal"
                     android:padding="3dp" >
 
-                    <com.example.brewdroid.OnOffIndicator
+                    <com.brew.brewdroid.OnOffIndicator
                         android:id="@+id/hltBurnerIndicator"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
@@ -301,7 +301,7 @@
                     android:layout_gravity="center_horizontal"
                     android:padding="3dp" >
 
-                    <com.example.brewdroid.OnOffIndicator
+                    <com.brew.brewdroid.OnOffIndicator
                         android:id="@+id/hltPumpIndicator"
                         android:layout_width="fill_parent"
                         android:layout_height="fill_parent"
@@ -325,7 +325,7 @@
                         android:layout_height="25dp"
                         android:padding="3dp" >
 
-                        <com.example.brewdroid.OnOffIndicator
+                        <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/hltMltIndicator"
                             android:layout_width="fill_parent"
                             android:layout_height="fill_parent"
@@ -345,7 +345,7 @@
                         android:layout_height="25dp"
                         android:padding="3dp" >
 
-                        <com.example.brewdroid.OnOffIndicator
+                        <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/hltHltIndicator"
                             android:layout_width="fill_parent"
                             android:layout_height="fill_parent"
@@ -371,7 +371,7 @@
         android:layout_centerHorizontal="true"
         android:padding="3dp" >
 
-        <com.example.brewdroid.OnOffIndicator
+        <com.brew.brewdroid.OnOffIndicator
             android:id="@+id/igniterIndicator"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"

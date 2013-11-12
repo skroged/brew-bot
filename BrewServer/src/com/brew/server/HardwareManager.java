@@ -38,7 +38,7 @@ public class HardwareManager {
 	public static final String ONE_WIRE_PATH_START = "/sys/bus/w1/devices/";
 	public static final String ONE_WIRE_PATH_END = "/w1_slave";
 	private static List<Sensor> sensors;
-	private static Map<SWITCH_NAME, Switch> switches;
+	private static Map<Integer, Switch> switches;
 
 	public static void init() {
 
@@ -69,11 +69,11 @@ public class HardwareManager {
 	}
 
 	private static void initSwitches() {
-		switches = new Hashtable<SWITCH_NAME, Switch>();
+		switches = new Hashtable<Integer, Switch>();
 
 		for (SWITCH_NAME sn : SWITCH_NAME.values()) {
 			Switch switchh = MySqlManager.getSwitch(sn);
-			switches.put(switchh.getName(), switchh);
+			switches.put(switchh.getId(), switchh);
 		}
 
 		// Switch hltPump = new Switch();
@@ -172,16 +172,17 @@ public class HardwareManager {
 
 			if (message.getData() != null) {
 
-				if (message.getData().getSwitches() != null) {
+				if (message.getData().getSwitchTransports() != null) {
 
-					for (SwitchTransport sw : message.getData().getSwitches()) {
+					for (SwitchTransport sw : message.getData()
+							.getSwitchTransports()) {
 
-						Switch switchh = switches.get(sw.getSwitchName());
+						Switch switchh = switches.get(sw.getSwitchId());
 						if (switchh != null) {
 							updateSwitchValue(switchh, sw.getSwitchValue());
 						} else {
-							System.out.println("no value for "
-									+ sw.getSwitchName());
+							// System.out.println("no value for "
+							// + sw.getSwitchName());
 						}
 
 					}
@@ -209,11 +210,11 @@ public class HardwareManager {
 			SwitchTransport switchTransport = new SwitchTransport();
 
 			switchTransport.setSwitchValue(switchh.getValue());
-			switchTransport.setSwitchName(switchh.getName());
+			switchTransport.setSwitchId(switchh.getId());
 
 			switches.add(switchTransport);
 
-			data.setSwitches(switches);
+			data.setSwitchTransports(switches);
 
 			message.setData(data);
 
@@ -270,24 +271,27 @@ public class HardwareManager {
 
 				data.setSensors(sensors);
 
-				List<SwitchTransport> switchTransports = new ArrayList<SwitchTransport>();
+				// List<SwitchTransport> switchTransports = new
+				// ArrayList<SwitchTransport>();
+				List<Switch> switchList = new ArrayList<Switch>();
 				Iterator<?> it = switches.entrySet().iterator();
 				while (it.hasNext()) {
 
-					SwitchTransport switchTransport = new SwitchTransport();
+					// SwitchTransport switchTransport = new SwitchTransport();
 
 					Map.Entry<?, ?> pairs = (Map.Entry<?, ?>) it.next();
 
 					Switch switchh = (Switch) pairs.getValue();
 
-					switchTransport.setSwitchValue(switchh.getValue());
-					switchTransport.setSwitchName(switchh.getName());
+					switchList.add(switchh);
+					// switchTransport.setSwitchValue(switchh.getValue());
+					// switchTransport.setSwitchName(switchh.getName());
 
-					switchTransports.add(switchTransport);
+					// switchTransports.add(switchTransport);
 
 				}
 
-				data.setSwitches(switchTransports);
+				data.setSwitches(switchList);
 
 				message.setData(data);
 
@@ -348,7 +352,7 @@ public class HardwareManager {
 		return sensors;
 	}
 
-	public static Map<SWITCH_NAME, Switch> getSwitches() {
+	public static Map<Integer, Switch> getSwitches() {
 		return switches;
 	}
 
@@ -557,7 +561,7 @@ public class HardwareManager {
 
 				}
 
-			//	System.out.println("bits: " + bits);
+				// System.out.println("bits: " + bits);
 
 				byte lowByte = (byte) (bits & 0xff);
 				byte hiByte = (byte) ((bits & 0xff00) >> 8);

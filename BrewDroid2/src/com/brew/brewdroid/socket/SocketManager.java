@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -27,7 +29,6 @@ import com.brew.lib.model.GsonHelper;
 import com.brew.lib.model.LogMessage;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
-import com.brew.lib.model.SensorTransport;
 import com.brew.lib.model.ServerInfo;
 import com.brew.lib.model.User;
 import com.google.gson.reflect.TypeToken;
@@ -100,45 +101,96 @@ public class SocketManager {
 		socketConnection.sendMessage(json);
 	}
 
-	private static boolean looping;
+	// private static boolean looping;
 
-	private static boolean enableConnectionReconnect;
+	// private static boolean enableConnectionReconnect;
 
-	private static void doConnectionLoop() {
+	// private static void doConnectionLoop() {
+	//
+	// looping = true;
+	//
+	// new Handler().postDelayed(new Runnable() {
+	//
+	// @Override
+	// public void run() {
+	//
+	// Log.i("JOSH", "connection loop executing");
+	//
+	// if (enableConnectionReconnect) {
+	// doConnectionLoop();
+	//
+	// if (socketConnection == null)
+	// connect(context);
+	// }
+	//
+	// }
+	//
+	// }, 3000);
+	// }
 
-		looping = true;
+	private static void startConnectTimer(final String serverHost) {
 
 		new Handler().postDelayed(new Runnable() {
 
 			@Override
 			public void run() {
 
-				if (enableConnectionReconnect) {
-					doConnectionLoop();
+				Log.i("JOSH", "connection loop executing");
 
-					if (socketConnection == null)
-						connect(context);
+				if (attemptingToConnect) {
+					startConnectTimer(serverHost);
+
+					long timeElapsed = System.currentTimeMillis()
+							- socketStartConnectTime;
+					long timeLeft = (TIMEOUT - timeElapsed) / 1000;
+
+					synchronized (socketManagerListeners) {
+						for (SocketManagerListener listener : socketManagerListeners) {
+							listener.onConnecting(timeLeft, PORT_NUMBER + "'",
+									serverHost);
+						}
+					}
 				}
 
 			}
 
-		}, 3000);
+		}, 1000);
+
 	}
+
+	private static boolean attemptingToConnect;
 
 	public static void disconnect() {
 
-		socketConnection.endThread();
+		if (socketConnection != null) {
+			socketConnection.endThread();
+		}
 		socketConnection = null;
-		enableConnectionReconnect = false;
+		attemptingToConnect = false;
+		// enableConnectionReconnect = false;
 
 	}
 
+	// private static int socketConnectTimer = 0;
+	private static long socketStartConnectTime;
+	private static final int TIMEOUT = 10000;
+
+	// private static String serverHost;
+
 	public static void connect(final Context context) {
 
-		enableConnectionReconnect = true;
+		if (attemptingToConnect) {
+			return;
+		}
 
-		if (!looping)
-			doConnectionLoop();
+		socketStartConnectTime = System.currentTimeMillis();
+
+		attemptingToConnect = true;
+
+		// enableConnectionReconnect = true;
+
+		// if (!looping)
+		// doConnectionLoop();
 
 		if (handler == null) {
 			handler = new Handler();
@@ -161,13 +213,34 @@ public class SocketManager {
 					SharedPreferences sp = context.getSharedPreferences(
 							"SETTINGS", Context.MODE_PRIVATE);
 
-					String serverHost = sp.getString("BREW_SERVER_IP",
+					final String serverHost = sp.getString("BREW_SERVER_IP",
 							"192.168.0.183");
 
-					clientSocket = new Socket(serverHost, PORT_NUMBER);
+					handler.post(new Runnable() {
+
+						@Override
+						public void run() {
+							startConnectTimer(serverHost);
+						}
+
+					});
+
+					clientSocket = new Socket();
+					SocketAddress remoteAddr = new InetSocketAddress(
+							serverHost, PORT_NUMBER);
+					clientSocket.connect(remoteAddr, TIMEOUT);
+
+					// clientSocket = new Socket(serverHost, PORT_NUMBER);
 
 					if (socketConnection != null) {
-						// already connected...
+						// connected...
+
+						synchronized (socketManagerListeners) {
+							for (SocketManagerListener listener : socketManagerListeners) {
+								listener.onConnect();
+							}
+						}
+
 						return;
 					}
 					Log.i("JOSH", "socket connected on " + PORT_NUMBER);
@@ -175,18 +248,18 @@ public class SocketManager {
 					socketConnection = new SocketConnection(clientSocket,
 							clientSocketListener);
 
-					User user = BrewDroidUtil.getSavedUser(context);
-
-					BrewMessage loginMessage = new BrewMessage();
-					loginMessage.setMethod(SOCKET_METHOD.LOGIN_USER);
-					BrewData data = new BrewData();
-					loginMessage.setData(data);
-					loginMessage.setGuaranteeId(UUID.randomUUID().toString());
-					List<User> users = new ArrayList<User>();
-					data.setUsers(users);
-					users.add(user);
-
-					SocketManager.sendMessage(loginMessage);
+					// User user = BrewDroidUtil.getSavedUser(context);
+					//
+					// BrewMessage loginMessage = new BrewMessage();
+					// loginMessage.setMethod(SOCKET_METHOD.LOGIN_USER);
+					// BrewData data = new BrewData();
+					// loginMessage.setData(data);
+					// loginMessage.setGuaranteeId(UUID.randomUUID().toString());
+					// List<User> users = new ArrayList<User>();
+					// data.setUsers(users);
+					// users.add(user);
+					//
+					// SocketManager.sendMessage(loginMessage);
 
 				} catch (IOException e) {
 					Log.i("JOSH", "socket error!");
@@ -196,6 +269,9 @@ public class SocketManager {
 							listener.onConnectFailed();
 						}
 					}
+
+					disconnect();
+
 					e.printStackTrace();
 				}
 				super.run();
@@ -573,6 +649,8 @@ public class SocketManager {
 		public void onDisconnect();
 
 		public void onConnect();
+
+		public void onConnecting(long timer, String port, String host);
 
 		public void onConnectFailed();
 

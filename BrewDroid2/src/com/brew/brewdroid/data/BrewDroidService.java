@@ -10,10 +10,11 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.brew.brewdroid.HomeScreen;
@@ -28,12 +29,9 @@ import com.brew.lib.model.CHANNEL_PERMISSION;
 import com.brew.lib.model.LogMessage;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
-import com.brew.lib.model.Sensor;
 import com.brew.lib.model.ServerInfo;
 import com.brew.lib.model.User;
 import com.brew.lib.util.BrewHelper;
-// Need the following import to get access to the app resources, since this
-// class is in a sub-package.
 
 /**
  * This is an example of implementing an application service that can run in the
@@ -59,6 +57,10 @@ public class BrewDroidService extends Service {
 	private Object[] mSetForegroundArgs = new Object[1];
 	private Object[] mStartForegroundArgs = new Object[2];
 	private Object[] mStopForegroundArgs = new Object[1];
+
+	private Handler handler;
+
+	public static String ACTION_CLOSE = "actionClose";
 
 	public static String ACTION_SUBSCRIBE = "actionSubscribe";
 	public static String ACTION_UNSUBSCRIBE = "actionUnsubscribe";
@@ -150,13 +152,16 @@ public class BrewDroidService extends Service {
 		}
 
 		SocketManager.registerSocketManagerListener(socketManagerListener);
+
+		handler = new Handler();
 	}
 
 	@Override
 	public void onDestroy() {
+		stopForeground(true);
 		// Make sure our notification is gone.
 		stopForegroundCompat(R.string.foreground_service_started);
-		SocketManager.disconnect();
+		closeSocket();
 	}
 
 	// This is the old onStart method that will be called on the pre-2.0
@@ -175,92 +180,120 @@ public class BrewDroidService extends Service {
 		return START_STICKY;
 	}
 
-	void handleCommand(Intent intent) {
-		if (ACTION_FOREGROUND.equals(intent.getAction())) {
-			// In this sample, we'll use the same text for the ticker and the
-			// expanded notification
-			CharSequence text = getText(R.string.foreground_service_started);
+	private void handleCommand(final Intent intent) {
 
-			// Set the icon, scrolling text and timestamp
-			Notification notification = new Notification(
-					R.drawable.ic_launcher, text, System.currentTimeMillis());
+		Runnable r = new Runnable() {
 
-			// The PendingIntent to launch our activity if the user selects this
-			// notification
-			PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-					new Intent(this, HomeScreen.class), 0);
+			@Override
+			public void run() {
 
-			// Set the info for the views that show in the notification panel.
-			notification.setLatestEventInfo(this,
-					getText(R.string.service_label), text, contentIntent);
+				if (intent == null || intent.getAction() == null) {
+					return;
+				}
 
-			startForegroundCompat(R.string.foreground_service_started,
-					notification);
+				if (intent.getAction().equals(ACTION_FOREGROUND)) {
+					openSocket();
+				} else if (intent.getAction().equals(ACTION_CLOSE)) {
+					stopSelf();
+				}
 
-			openSocket();
-		}
+				else if (intent.getAction().equals(ACTION_LOGIN)) {
 
-		else if (intent.getAction().equals(ACTION_LOGIN)) {
+					if (!SocketManager.isConnected()) {
+						sendConnectionErrorBroadcast();
+						return;
+					}
 
-			Bundle bundle = intent.getExtras();
+					Bundle bundle = intent.getExtras();
 
-			String username = bundle.getString(BUNDLE_USERNAME);
-			String password = bundle.getString(BUNDLE_PASSWORD);
+					String username = bundle.getString(BUNDLE_USERNAME);
+					String password = bundle.getString(BUNDLE_PASSWORD);
 
-			BrewMessage message = new BrewMessage();
-			message.setMethod(SOCKET_METHOD.LOGIN_USER);
-			BrewData data = new BrewData();
-			message.setData(data);
-			message.setGuaranteeId(UUID.randomUUID().toString());
-			List<User> users = new ArrayList<User>();
-			data.setUsers(users);
-			User user = new User();
-			users.add(user);
-			user.setUsername(username);
-			String md5 = BrewHelper.md5(password);
-			user.setPassword(md5);
+					BrewMessage message = new BrewMessage();
+					message.setMethod(SOCKET_METHOD.LOGIN_USER);
+					BrewData data = new BrewData();
+					message.setData(data);
+					message.setGuaranteeId(UUID.randomUUID().toString());
+					List<User> users = new ArrayList<User>();
+					data.setUsers(users);
+					User user = new User();
+					users.add(user);
+					user.setUsername(username);
+					String md5 = BrewHelper.md5(password);
+					user.setPassword(md5);
 
-			SocketManager.sendMessage(message);
+					SocketManager.sendMessage(message);
 
-			BrewDroidUtil.saveUser(BrewDroidService.this, user);
+					BrewDroidUtil.saveUser(BrewDroidService.this, user);
 
-		} else if (intent.getAction().equals(ACTION_SUBSCRIBE)) {
+				} else if (intent.getAction().equals(ACTION_SUBSCRIBE)) {
 
-			Bundle bundle = intent.getExtras();
+					if (!SocketManager.isConnected()) {
+						sendConnectionErrorBroadcast();
+						return;
+					}
 
-			String channelStr = bundle.getString(BUNDLE_CHANNEL);
-			SOCKET_CHANNEL channel = SOCKET_CHANNEL.valueOf(channelStr);
+					Bundle bundle = intent.getExtras();
 
-			BrewMessage message = new BrewMessage();
-			message.setMethod(SOCKET_METHOD.SUBSCRIBE);
-			message.setChannel(channel);
-			message.setGuaranteeId(UUID.randomUUID().toString());
+					String channelStr = bundle.getString(BUNDLE_CHANNEL);
+					SOCKET_CHANNEL channel = SOCKET_CHANNEL.valueOf(channelStr);
 
-			SocketManager.sendMessage(message);
+					BrewMessage message = new BrewMessage();
+					message.setMethod(SOCKET_METHOD.SUBSCRIBE);
+					message.setChannel(channel);
+					message.setGuaranteeId(UUID.randomUUID().toString());
 
-		} else if (intent.getAction().equals(ACTION_UNSUBSCRIBE)) {
+					SocketManager.sendMessage(message);
 
-			Bundle bundle = intent.getExtras();
+				} else if (intent.getAction().equals(ACTION_UNSUBSCRIBE)) {
 
-			String channelStr = bundle.getString(BUNDLE_CHANNEL);
-			SOCKET_CHANNEL channel = SOCKET_CHANNEL.valueOf(channelStr);
+					if (!SocketManager.isConnected()) {
+						sendConnectionErrorBroadcast();
+						return;
+					}
 
-			BrewMessage message = new BrewMessage();
-			message.setMethod(SOCKET_METHOD.UNSUBSCRIBE);
-			message.setChannel(channel);
-			message.setGuaranteeId(UUID.randomUUID().toString());
+					Bundle bundle = intent.getExtras();
 
-			SocketManager.sendMessage(message);
+					String channelStr = bundle.getString(BUNDLE_CHANNEL);
+					SOCKET_CHANNEL channel = SOCKET_CHANNEL.valueOf(channelStr);
 
-		}
+					BrewMessage message = new BrewMessage();
+					message.setMethod(SOCKET_METHOD.UNSUBSCRIBE);
+					message.setChannel(channel);
+					message.setGuaranteeId(UUID.randomUUID().toString());
+
+					SocketManager.sendMessage(message);
+
+				}
+
+			}
+
+		};
+
+		new Thread(r).start();
+
+	}
+
+	private void sendConnectionErrorBroadcast() {
+
 	}
 
 	private void openSocket() {
-		SocketManager.connect(this);
+		handler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				SocketManager.connect(BrewDroidService.this);
+			}
+
+		});
+
 	}
 
 	private void closeSocket() {
-		SocketManager.disconnect();
+		if (SocketManager.isConnected()) {
+			SocketManager.disconnect();
+		}
 	}
 
 	@Override
@@ -291,14 +324,62 @@ public class BrewDroidService extends Service {
 
 		@Override
 		public void onConnect() {
-			// TODO Auto-generated method stub
 
+			NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+					BrewDroidService.this).setSmallIcon(R.drawable.ic_launcher)
+					.setContentTitle("Brew Service")
+					.setContentText("Connected to Brew Bot");
+
+			PendingIntent contentIntent = PendingIntent.getActivity(
+					BrewDroidService.this, 0, new Intent(BrewDroidService.this,
+							HomeScreen.class), 0);
+
+			mBuilder.setContentIntent(contentIntent);
+
+			Notification notification = mBuilder.build();
+
+			startForeground(2, notification);
+
+			loginSavedUser();
 		}
 
 		@Override
 		public void onConnectFailed() {
-			// TODO Auto-generated method stub
 
+			String msg = "There was an error trying to connect to the Brew Bot!";
+
+			Intent closeIntent = new Intent(BrewDroidService.this,
+					BrewDroidService.class);
+			closeIntent.setAction(ACTION_CLOSE);
+			PendingIntent piClose = PendingIntent.getService(
+					BrewDroidService.this, 0, closeIntent, 0);
+
+			Intent retryIntent = new Intent(BrewDroidService.this,
+					BrewDroidService.class);
+			retryIntent.setAction(ACTION_FOREGROUND);
+			PendingIntent piRetry = PendingIntent.getService(
+					BrewDroidService.this, 0, retryIntent, 0);
+
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(
+					BrewDroidService.this).setSmallIcon(R.drawable.ic_launcher)
+					.setContentTitle("Brew Service")
+					.setContentText("Failed to connect to Brew Bot");
+
+			Intent resultIntent = new Intent(BrewDroidService.this,
+					HomeScreen.class);
+
+			PendingIntent contentIntent = PendingIntent.getActivity(
+					BrewDroidService.this, 0, resultIntent, 0);
+
+			builder.setContentIntent(contentIntent);
+
+			builder.setStyle(new NotificationCompat.BigTextStyle().bigText(msg));
+			builder.addAction(R.drawable.ic_launcher, "Close", piClose);
+			builder.addAction(R.drawable.ic_launcher, "Retry", piRetry);
+
+			Notification notification = builder.build();
+
+			startForeground(2, notification);
 		}
 
 		@Override
@@ -310,14 +391,52 @@ public class BrewDroidService extends Service {
 						brewData.getSensors(), null);
 
 			}
-			
+
 			if (brewData.getSensorTransports() != null) {
-				
+
 				BrewDroidContentProvider.updateSensors(null,
 						BrewDroidService.this, brewData.getSensorTransports());
 
 			}
 
+			if (brewData.getSwitches() != null) {
+
+				BrewDroidContentProvider.insertSwitches(BrewDroidService.this,
+						brewData.getSwitches(), null);
+
+			}
+
+			if (brewData.getSwitchTransports() != null) {
+
+				BrewDroidContentProvider.updateSwitches(null,
+						BrewDroidService.this, brewData.getSwitchTransports());
+
+			}
+
+		}
+
+		@Override
+		public void onConnecting(long timer, String port, String host) {
+
+			String msg = "Connecting to Brew Bot ..." + timer + "\nHost: "
+					+ host + "\nPort: " + port;
+
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(
+					BrewDroidService.this).setSmallIcon(R.drawable.ic_launcher)
+					.setContentTitle("Brew Service")
+					.setContentText("Connecting to Brew Bot ..." + timer);
+
+			builder.setStyle(new NotificationCompat.BigTextStyle().bigText(msg));
+
+			PendingIntent contentIntent = PendingIntent.getActivity(
+					BrewDroidService.this, 0, new Intent(BrewDroidService.this,
+							HomeScreen.class), 0);
+
+			builder.setContentIntent(contentIntent);
+
+			Notification notification = builder.build();
+
+			startForeground(2, notification);
 		}
 
 		@Override
@@ -369,5 +488,15 @@ public class BrewDroidService extends Service {
 		}
 
 	};
+
+	private void loginSavedUser() {
+		User user = BrewDroidUtil.getSavedUser(BrewDroidService.this);
+
+		Intent intent = new Intent(BrewDroidService.ACTION_LOGIN);
+		intent.putExtra(BrewDroidService.BUNDLE_USERNAME, user.getUsername());
+		intent.putExtra(BrewDroidService.BUNDLE_PASSWORD, user.getPassword());
+		intent.setClass(BrewDroidService.this, BrewDroidService.class);
+		BrewDroidService.this.startService(intent);
+	}
 
 }

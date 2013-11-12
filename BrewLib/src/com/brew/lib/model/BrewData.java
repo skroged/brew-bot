@@ -7,7 +7,8 @@ public class BrewData {
 	private List<SensorSettingsTransport> sensorSettings;
 	private List<SensorTransport> sensorTransports;
 	private List<Sensor> sensors;
-	private List<SwitchTransport> switches;
+	private List<SwitchTransport> switchTransports;
+	private List<Switch> switches;
 	private List<User> users;
 	private List<String> oneWireAddresses;
 
@@ -17,14 +18,6 @@ public class BrewData {
 
 	public void setSensorTransports(List<SensorTransport> sensorTransports) {
 		this.sensorTransports = sensorTransports;
-	}
-
-	public List<SwitchTransport> getSwitches() {
-		return switches;
-	}
-
-	public void setSwitches(List<SwitchTransport> switches) {
-		this.switches = switches;
 	}
 
 	public List<User> getUsers() {
@@ -57,6 +50,22 @@ public class BrewData {
 
 	public void setSensors(List<Sensor> sensors) {
 		this.sensors = sensors;
+	}
+
+	public List<SwitchTransport> getSwitchTransports() {
+		return switchTransports;
+	}
+
+	public void setSwitchTransports(List<SwitchTransport> switchTransports) {
+		this.switchTransports = switchTransports;
+	}
+
+	public List<Switch> getSwitches() {
+		return switches;
+	}
+
+	public void setSwitches(List<Switch> switches) {
+		this.switches = switches;
 	}
 
 }
