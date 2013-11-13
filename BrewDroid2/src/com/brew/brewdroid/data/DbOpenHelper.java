@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
 
-	private static final int DB_VERSION = 2;
+	private static final int DB_VERSION = 3;
 	private static final String DATABASE_NAME = "BrewBotDatabase";
 
 	public static final String SENSORS_TABLE_NAME = "sensors";
@@ -17,7 +17,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 	public static final String SENSORS_ADDRESS = "sensorAddress";
 	public static final String SENSORS_VALUE = "sensorValue";
 
-	public static final String SWITCHES_TABLE_NAME = "sensors";
+	public static final String SWITCHES_TABLE_NAME = "switches";
 	public static final String SWITCHES_ID = "idswitches";
 	public static final String SWITCHES_NAME = "switchName";
 	public static final String SWITCHES_ADDRESS = "switchAddress";

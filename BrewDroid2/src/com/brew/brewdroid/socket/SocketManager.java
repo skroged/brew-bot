@@ -247,6 +247,8 @@ public class SocketManager {
 
 					socketConnection = new SocketConnection(clientSocket,
 							clientSocketListener);
+					
+					attemptingToConnect = false;
 
 					// User user = BrewDroidUtil.getSavedUser(context);
 					//

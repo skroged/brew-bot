@@ -23,8 +23,10 @@ import com.brew.brewdroid.data.BrewDroidContentProvider.QueryListener;
 import com.brew.brewdroid.data.BrewDroidService;
 import com.brew.brewdroid.data.DataObjectTranslator;
 import com.brew.lib.model.SOCKET_CHANNEL;
+import com.brew.lib.model.SWITCH_NAME;
 import com.brew.lib.model.Sensor;
 import com.brew.lib.model.Switch;
+import com.brew.lib.model.SwitchTransport;
 
 public class BrewControlFragment extends Fragment {
 
@@ -233,6 +235,9 @@ public class BrewControlFragment extends Fragment {
 						BrewDroidContentProvider.registerSwitchContentObserver(
 								getActivity(), switchContentObserver, switchId);
 						onSwitchUpdate(switchh);
+
+						assignSwitchButtonTag(switchh);
+
 					} catch (CursorIndexOutOfBoundsException e) {
 						e.printStackTrace();
 					}
@@ -275,9 +280,54 @@ public class BrewControlFragment extends Fragment {
 
 	};
 
+	private void assignSwitchButtonTag(Switch switchh) {
+		switch (switchh.getName()) {
+		case BK_BK:
+			bkBkButton.setTag(switchh.getId());
+			break;
+		case BK_BURNER:
+			bkBurnerButton.setTag(switchh.getId());
+			break;
+		case BK_FERM:
+			bkFermButton.setTag(switchh.getId());
+			break;
+		case BK_PUMP:
+			bkPumpButton.setTag(switchh.getId());
+			break;
+		case HLT_BURNER:
+			hltBurnerButton.setTag(switchh.getId());
+			break;
+		case HLT_HLT:
+			hltHltButton.setTag(switchh.getId());
+			break;
+		case HLT_MLT:
+			hltMltButton.setTag(switchh.getId());
+			break;
+		case HLT_PUMP:
+			hltPumpButton.setTag(switchh.getId());
+			break;
+		case IGNITER:
+			igniterButton.setTag(switchh.getId());
+			break;
+		case MLT_BK:
+			mltBkButton.setTag(switchh.getId());
+			break;
+		case MLT_BURNER:
+			mltBurnerButton.setTag(switchh.getId());
+			break;
+		case MLT_MLT:
+			mltMltButton.setTag(switchh.getId());
+			break;
+		case MLT_PUMP:
+			mltPumpButton.setTag(switchh.getId());
+			break;
+		}
+	}
+
 	private void onSwitchUpdate(Switch switchh) {
 		Log.i("JOSH",
-				"new value for " + switchh.getName() + ": " + switchh.getValue());
+				"new value for " + switchh.getName() + ": "
+						+ switchh.getValue());
 
 		NumberFormat nf = NumberFormat.getNumberInstance();
 		nf.setMaximumFractionDigits(2);
@@ -323,7 +373,6 @@ public class BrewControlFragment extends Fragment {
 		case IGNITER:
 			igniterIndicator.setOn(switchh.getValue());
 			break;
-
 		}
 
 	}
@@ -332,6 +381,71 @@ public class BrewControlFragment extends Fragment {
 
 		@Override
 		public void onClick(View v) {
+
+			int switchId = (Integer) v.getTag();
+			boolean isOn = false;;
+
+			switch (v.getId()) {
+
+			case R.id.hltPumpButton:
+				isOn = !hltPumpIndicator.isOn();
+				break;
+
+			case R.id.hltBurnerButton:
+				isOn = !hltBurnerIndicator.isOn();
+				break;
+
+			case R.id.hltHltButton:
+				isOn = !hltHltIndicator.isOn();
+				break;
+
+			case R.id.hltMltButton:
+				isOn = !hltMltIndicator.isOn();
+				break;
+
+			case R.id.mltPumpButton:
+				isOn = !mltPumpIndicator.isOn();
+				break;
+
+			case R.id.mltBurnerButton:
+				isOn = !mltBurnerIndicator.isOn();
+				break;
+
+			case R.id.mltMltButton:
+				isOn = !mltMltIndicator.isOn();
+				break;
+
+			case R.id.mltBkButton:
+				isOn = !mltBkIndicator.isOn();
+				break;
+
+			case R.id.bkPumpButton:
+				isOn = !bkPumpIndicator.isOn();
+				break;
+
+			case R.id.bkBurnerButton:
+				isOn = !bkBurnerIndicator.isOn();
+				break;
+
+			case R.id.bkBkButton:
+				isOn = !bkBkIndicator.isOn();
+				break;
+
+			case R.id.bkFermButton:
+				isOn = !bkFermIndicator.isOn();
+				break;
+
+			case R.id.igniterButton:
+				isOn = !igniterIndicator.isOn();
+				break;
+			}
+
+			Intent intent = new Intent(BrewDroidService.ACTION_SWITCH_UPDATE);
+			intent.putExtra(BrewDroidService.BUNDLE_SWITCH_ID, switchId);
+			intent.putExtra(BrewDroidService.BUNDLE_SWITCH_VALUE, isOn);
+			intent.setClass(getActivity(), BrewDroidService.class);
+			getActivity().startService(intent);
+
 		}
 	};
 

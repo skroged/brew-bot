@@ -12,6 +12,7 @@ import android.widget.EditText;
 
 import com.brew.brewdroid.data.BrewDroidService;
 import com.brew.lib.model.User;
+import com.brew.lib.util.BrewHelper;
 
 public class LoginUserFragment extends Fragment {
 
@@ -53,8 +54,8 @@ public class LoginUserFragment extends Fragment {
 				Intent intent = new Intent(BrewDroidService.ACTION_LOGIN);
 				intent.putExtra(BrewDroidService.BUNDLE_USERNAME, usernameText
 						.getText().toString());
-				intent.putExtra(BrewDroidService.BUNDLE_PASSWORD, passwordText
-						.getText().toString());
+				intent.putExtra(BrewDroidService.BUNDLE_PASSWORD,
+						BrewHelper.md5(passwordText.getText().toString()));
 				intent.setClass(getActivity(), BrewDroidService.class);
 				getActivity().startService(intent);
 

@@ -30,6 +30,7 @@ import com.brew.lib.model.LogMessage;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.ServerInfo;
+import com.brew.lib.model.SwitchTransport;
 import com.brew.lib.model.User;
 import com.brew.lib.util.BrewHelper;
 
@@ -66,11 +67,14 @@ public class BrewDroidService extends Service {
 	public static String ACTION_UNSUBSCRIBE = "actionUnsubscribe";
 	public static String ACTION_LOGIN = "actionLogin";
 	public static String ACTION_AUTH_RESULT = "actionAuthResult";
+	public static String ACTION_SWITCH_UPDATE = "actionSwitchUpdate";
 
 	public static String BUNDLE_CHANNEL = "bundleChannel";
 	public static String BUNDLE_USERNAME = "bundleUsername";
 	public static String BUNDLE_PASSWORD = "bundlePassword";
 	public static String BUNDLE_AUTH_RESULT = "bundleAuthResult";
+	public static String BUNDLE_SWITCH_ID = "bundleSwitchId";
+	public static String BUNDLE_SWITCH_VALUE = "bundleSwitchValue";
 
 	void invokeMethod(Method method, Object[] args) {
 		try {
@@ -219,8 +223,7 @@ public class BrewDroidService extends Service {
 					User user = new User();
 					users.add(user);
 					user.setUsername(username);
-					String md5 = BrewHelper.md5(password);
-					user.setPassword(md5);
+					user.setPassword(password);
 
 					SocketManager.sendMessage(message);
 
@@ -262,6 +265,34 @@ public class BrewDroidService extends Service {
 					message.setChannel(channel);
 					message.setGuaranteeId(UUID.randomUUID().toString());
 
+					SocketManager.sendMessage(message);
+
+				}
+
+				else if (intent.getAction().equals(ACTION_SWITCH_UPDATE)) {
+
+					if (!SocketManager.isConnected()) {
+						sendConnectionErrorBroadcast();
+						return;
+					}
+
+					Bundle bundle = intent.getExtras();
+
+					int switchId = bundle.getInt(BUNDLE_SWITCH_ID);
+					boolean isOn = bundle.getBoolean(BUNDLE_SWITCH_VALUE);
+					
+					SwitchTransport st = new SwitchTransport();
+					st.setSwitchId(switchId);
+					st.setSwitchValue(isOn);
+
+					BrewMessage message = new BrewMessage();
+					message.setGuaranteeId(UUID.randomUUID().toString());
+					message.setMethod(SOCKET_METHOD.SWITCH_UPDATE);
+					BrewData data = new BrewData();
+					message.setData(data);
+					List<SwitchTransport> switches = new ArrayList<SwitchTransport>();
+					switches.add(st);
+					data.setSwitchTransports(switches);
 					SocketManager.sendMessage(message);
 
 				}

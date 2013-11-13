@@ -71,7 +71,7 @@ public class HardwareManager {
 	private static void initSwitches() {
 		switches = new Hashtable<Integer, Switch>();
 
-		for (SWITCH_NAME sn : SWITCH_NAME.values()) {
+		for (SWITCH_NAME sn : SWITCH_NAME.values()) {			
 			Switch switchh = MySqlManager.getSwitch(sn);
 			switches.put(switchh.getId(), switchh);
 		}
