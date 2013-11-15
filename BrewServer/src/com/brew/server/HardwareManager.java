@@ -71,9 +71,11 @@ public class HardwareManager {
 	private static void initSwitches() {
 		switches = new Hashtable<Integer, Switch>();
 
-		for (SWITCH_NAME sn : SWITCH_NAME.values()) {			
+		for (SWITCH_NAME sn : SWITCH_NAME.values()) {
 			Switch switchh = MySqlManager.getSwitch(sn);
-			switches.put(switchh.getId(), switchh);
+			if (switchh != null) {
+				switches.put(switchh.getId(), switchh);
+			}
 		}
 
 		// Switch hltPump = new Switch();
@@ -144,7 +146,7 @@ public class HardwareManager {
 
 						for (Sensor sensor : sensors) {
 
-							if (sensor.getSensorName() == sst.getSensorName()) {
+							if (sensor.getSensorId() == sst.getSensorId()) {
 
 								Logger.log("SETTINGS", "new settings for "
 										+ sensor.getSensorName());
@@ -387,8 +389,8 @@ public class HardwareManager {
 				}
 
 				// read any errors from the attempted command
-				System.out
-						.println("Here is the standard error of the command (if any):\n");
+				//System.out
+				//		.println("Here is the standard error of the command (if any):\n");
 				while (!kilt && (s = stdError.readLine()) != null) {
 					System.out.println(s);
 				}
@@ -397,6 +399,8 @@ public class HardwareManager {
 
 				stdInput.close();
 				stdError.close();
+				
+				Logger.log("SYSTEM", "SPI ended");
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -599,8 +603,10 @@ public class HardwareManager {
 		File directory = new File(path);
 		File[] devices = directory.listFiles();
 
-		for (File f : devices) {
-			returnList.add(f.getName());
+		if (devices != null) {
+			for (File f : devices) {
+				returnList.add(f.getName());
+			}
 		}
 
 		return returnList;

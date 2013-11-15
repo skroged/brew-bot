@@ -17,7 +17,6 @@ public class Sensor {
 			SensorSettingsTransport transport, boolean applyValue) {
 
 		address = transport.getAddress();
-		sensorName = transport.getSensorName();
 		calibration = new SensorCalibration();
 		calibration.setInputHigh(transport.getInputHigh());
 		calibration.setInputLow(transport.getInputLow());

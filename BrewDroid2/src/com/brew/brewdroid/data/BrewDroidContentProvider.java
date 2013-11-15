@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.brew.lib.model.Sensor;
+import com.brew.lib.model.SensorSettingsTransport;
 import com.brew.lib.model.SensorTransport;
 import com.brew.lib.model.Switch;
 import com.brew.lib.model.SwitchTransport;
@@ -139,22 +140,32 @@ public class BrewDroidContentProvider extends ContentProvider {
 
 		switch (sUriMatcher.match(uri)) {
 		case SENSORS:
+
 			count = mDbOpenHelper
 					.updateSensor(values, selection, selectionArgs);
 			break;
 
 		case SENSOR:
+
 			count = mDbOpenHelper
 					.updateSensor(values, selection, selectionArgs);
+
+			getContext().getContentResolver().notifyChange(SENSORS_URI, null);
+
 			break;
 		case SWITCHES:
+
 			count = mDbOpenHelper
 					.updateSwitch(values, selection, selectionArgs);
 			break;
 
 		case SWITCH:
+
 			count = mDbOpenHelper
 					.updateSwitch(values, selection, selectionArgs);
+
+			getContext().getContentResolver().notifyChange(SWITCHES_URI, null);
+
 			break;
 		}
 
@@ -198,6 +209,25 @@ public class BrewDroidContentProvider extends ContentProvider {
 
 	}
 
+	public static void updateSensorSetting(UpdateListener updateListener,
+			Context context, SensorSettingsTransport sensorSettingsTransport) {
+
+		ContentValues values = DataObjectTranslator
+				.getContentVluesFromSensorSettinsTransport(sensorSettingsTransport);
+
+		String where = DbOpenHelper.SENSORS_ID + " = ?";
+
+		String[] whereClause = { sensorSettingsTransport.getSensorId() + "" };
+
+		Uri uri = SENSORS_URI.buildUpon()
+				.appendEncodedPath(sensorSettingsTransport.getSensorId() + "")
+				.build();
+
+		new UpdateTask(updateListener, context, uri, values, whereClause, where)
+				.execute();
+
+	}
+
 	public static void updateSensors(final UpdateListener updateListener,
 			Context context, final List<SensorTransport> sensorTransports) {
 
@@ -221,6 +251,34 @@ public class BrewDroidContentProvider extends ContentProvider {
 
 		for (SensorTransport st : sensorTransports) {
 			updateSensor(listener, context, st);
+		}
+
+	}
+
+	public static void updateSensorSettings(
+			final UpdateListener updateListener, Context context,
+			final List<SensorSettingsTransport> sensorSettingsTransports) {
+
+		UpdateListener listener = new UpdateListener() {
+
+			int listenerCount = 0;
+			int updateCount = 0;
+
+			@Override
+			public void onComplete(int count) {
+				updateCount += count;
+				listenerCount++;
+
+				if (updateListener != null
+						&& listenerCount == sensorSettingsTransports.size()) {
+					updateListener.onComplete(updateCount);
+				}
+			}
+
+		};
+
+		for (SensorSettingsTransport st : sensorSettingsTransports) {
+			updateSensorSetting(listener, context, st);
 		}
 
 	}
@@ -253,6 +311,14 @@ public class BrewDroidContentProvider extends ContentProvider {
 
 		context.getContentResolver().registerContentObserver(uri, false,
 				observer);
+
+	}
+
+	public static void registerSensorsContentObserver(Context context,
+			ContentObserver observer) {
+
+		context.getContentResolver().registerContentObserver(SENSORS_URI,
+				false, observer);
 
 	}
 

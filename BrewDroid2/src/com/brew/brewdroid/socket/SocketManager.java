@@ -213,8 +213,11 @@ public class SocketManager {
 					SharedPreferences sp = context.getSharedPreferences(
 							"SETTINGS", Context.MODE_PRIVATE);
 
+					// final String serverHost = sp.getString("BREW_SERVER_IP",
+					// "192.168.0.183");
+
 					final String serverHost = sp.getString("BREW_SERVER_IP",
-							"192.168.0.183");
+							"10.112.245.171");
 
 					handler.post(new Runnable() {
 
@@ -247,7 +250,7 @@ public class SocketManager {
 
 					socketConnection = new SocketConnection(clientSocket,
 							clientSocketListener);
-					
+
 					attemptingToConnect = false;
 
 					// User user = BrewDroidUtil.getSavedUser(context);

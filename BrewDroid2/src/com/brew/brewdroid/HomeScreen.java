@@ -23,6 +23,7 @@ public class HomeScreen extends Activity {
 	private ServiceControlFragment mServiceControlFrag;
 	private LoginUserFragment mLoginFragment;
 	private BrewControlFragment mBrewControlFragment;
+	private SensorSettingsFragment mSensorSettingsFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +31,7 @@ public class HomeScreen extends Activity {
 		setContentView(R.layout.activity_home_screen);
 
 		mNavigationItems = new String[] { "Service Control", "Login",
-				"Brew Control" };
+				"Brew Control", "Sensor Settings" };
 
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
@@ -148,6 +149,22 @@ public class HomeScreen extends Activity {
 		ft.commit();
 	}
 
+	private void gotoSensorSettingsFragment() {
+
+		if (mSensorSettingsFragment == null) {
+			mSensorSettingsFragment = SensorSettingsFragment.instantiate();
+		}
+
+		if (getFragmentManager().findFragmentById(R.id.content_frame) == mSensorSettingsFragment) {
+			return;
+		}
+
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		ft.replace(R.id.content_frame, mSensorSettingsFragment);
+		ft.commit();
+
+	}
+
 	private void selectItem(int position) {
 
 		if (position == 0) {
@@ -157,6 +174,8 @@ public class HomeScreen extends Activity {
 			goToLoginFragment();
 		} else if (position == 2) {
 			gotoBrewControlFragment();
+		} else if (position == 3) {
+			gotoSensorSettingsFragment();
 		}
 		// // Create a new fragment and specify the planet to show based on
 		// // position

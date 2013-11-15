@@ -5,10 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.BaseColumns;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
 
-	private static final int DB_VERSION = 3;
+	private static final int DB_VERSION = 4;
 	private static final String DATABASE_NAME = "BrewBotDatabase";
 
 	public static final String SENSORS_TABLE_NAME = "sensors";
@@ -16,6 +17,10 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 	public static final String SENSORS_NAME = "sensorName";
 	public static final String SENSORS_ADDRESS = "sensorAddress";
 	public static final String SENSORS_VALUE = "sensorValue";
+	public static final String SENSORS_CALIBRATION_INPUT_LOW = "sensorCalibrationInputLow";
+	public static final String SENSORS_CALIBRATION_INPUT_HIGH = "sensorCalibrationInputHigh";
+	public static final String SENSORS_CALIBRATION_OUTPUT_LOW = "sensorCalibrationOutputLow";
+	public static final String SENSORS_CALIBRATION_OUTPUT_HIGH = "sensorCalibrationOutputHigh";
 
 	public static final String SWITCHES_TABLE_NAME = "switches";
 	public static final String SWITCHES_ID = "idswitches";
@@ -23,15 +28,41 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 	public static final String SWITCHES_ADDRESS = "switchAddress";
 	public static final String SWITCHES_VALUE = "switchValue";
 
+	// public static final String SENSOR_CALIBRATIONS_TABLE_NAME =
+	// "sensorCalibrations";
+	// public static final String SENSOR_CALIBRATIONS_ID =
+	// "isSensorCalibrations";
+	// public static final String SENSOR_CALIBRATIONS_SENSOR_ID =
+	// "sensorCalibrationsSensorId";
+
 	public static final String SENSORS_CREATE_TABLE = "CREATE TABLE "
 			+ SENSORS_TABLE_NAME + " (" + SENSORS_ID + " INTEGER PRIMARY KEY, "
 			+ SENSORS_NAME + " TEXT, " + SENSORS_ADDRESS + " TEXT, "
-			+ SENSORS_VALUE + " REAL);";
+			+ SENSORS_VALUE + " REAL," + SENSORS_CALIBRATION_INPUT_LOW
+			+ " REAL," + SENSORS_CALIBRATION_INPUT_HIGH + " REAL,"
+			+ SENSORS_CALIBRATION_OUTPUT_LOW + " REAL,"
+			+ SENSORS_CALIBRATION_OUTPUT_HIGH + " REAL);";
 
 	public static final String SWITCHES_CREATE_TABLE = "CREATE TABLE "
 			+ SWITCHES_TABLE_NAME + " (" + SWITCHES_ID
 			+ " INTEGER PRIMARY KEY, " + SWITCHES_NAME + " TEXT, "
 			+ SWITCHES_ADDRESS + " TEXT, " + SWITCHES_VALUE + " REAL);";
+
+	// public static final String SENSOR_CALIBRATIONS_CREATE_TABLE =
+	// "CREATE TABLE "
+	// + SENSOR_CALIBRATIONS_TABLE_NAME
+	// + " ("
+	// + SENSOR_CALIBRATIONS_ID
+	// + " INTEGER PRIMARY KEY, "
+	// + SENSOR_CALIBRATIONS_SENSOR_ID
+	// + " INTEGER, "
+	// + SENSOR_CALIBRATIONS_INPUT_LOW
+	// + " REAL, "
+	// + SENSOR_CALIBRATIONS_INPUT_HIGH
+	// + " REAL, "
+	// + SENSOR_CALIBRATIONS_OUTPUT_LOW
+	// + " REAL, "
+	// + SENSOR_CALIBRATIONS_OUTPUT_HIGH + " REAL);";
 
 	public DbOpenHelper(Context context) {
 		super(context, DATABASE_NAME, null, DB_VERSION);
@@ -110,12 +141,14 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 
 		SQLiteDatabase db = getWritableDatabase();
 
-		return db.query(SENSORS_TABLE_NAME, null, selection, selectionArgs,
+		String[] cols = { SENSORS_ID + " AS " + BaseColumns._ID, "*" };
+		
+		return db.query(SENSORS_TABLE_NAME, cols, selection, selectionArgs,
 				null, null, null);
 	}
-	
-	//////////////////
-	
+
+	// ////////////////
+
 	public int updateSwitch(ContentValues values, String where,
 			String[] whereArgs) {
 

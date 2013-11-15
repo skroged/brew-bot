@@ -7,6 +7,8 @@ import android.database.CursorIndexOutOfBoundsException;
 import com.brew.lib.model.SENSOR_NAME;
 import com.brew.lib.model.SWITCH_NAME;
 import com.brew.lib.model.Sensor;
+import com.brew.lib.model.SensorCalibration;
+import com.brew.lib.model.SensorSettingsTransport;
 import com.brew.lib.model.SensorTransport;
 import com.brew.lib.model.Switch;
 import com.brew.lib.model.SwitchTransport;
@@ -22,6 +24,17 @@ public class DataObjectTranslator {
 		values.put(DbOpenHelper.SENSORS_ADDRESS, sensor.getAddress());
 		values.put(DbOpenHelper.SENSORS_VALUE, sensor.getCalibratedValue());
 
+		if (sensor.getCalibration() != null) {
+			values.put(DbOpenHelper.SENSORS_CALIBRATION_INPUT_LOW, sensor
+					.getCalibration().getInputLow());
+			values.put(DbOpenHelper.SENSORS_CALIBRATION_INPUT_HIGH, sensor
+					.getCalibration().getInputHigh());
+			values.put(DbOpenHelper.SENSORS_CALIBRATION_OUTPUT_LOW, sensor
+					.getCalibration().getOutputLow());
+			values.put(DbOpenHelper.SENSORS_CALIBRATION_OUTPUT_HIGH, sensor
+					.getCalibration().getOutputHigh());
+		}
+
 		return values;
 	}
 
@@ -34,6 +47,26 @@ public class DataObjectTranslator {
 		values.put(DbOpenHelper.SENSORS_VALUE, sensor.getValue());
 
 		return values;
+	}
+
+	public static ContentValues getContentVluesFromSensorSettinsTransport(
+			SensorSettingsTransport sensor) {
+
+		ContentValues values = new ContentValues();
+
+		values.put(DbOpenHelper.SENSORS_ID, sensor.getSensorId());
+		values.put(DbOpenHelper.SENSORS_VALUE, sensor.getCalibratedValue());
+		values.put(DbOpenHelper.SENSORS_CALIBRATION_INPUT_LOW,
+				sensor.getInputLow());
+		values.put(DbOpenHelper.SENSORS_CALIBRATION_INPUT_HIGH,
+				sensor.getInputHigh());
+		values.put(DbOpenHelper.SENSORS_CALIBRATION_OUTPUT_LOW,
+				sensor.getOutputLow());
+		values.put(DbOpenHelper.SENSORS_CALIBRATION_OUTPUT_HIGH,
+				sensor.getOutputHigh());
+
+		return values;
+
 	}
 
 	public static Sensor getSensorFromCursor(Cursor cursor)
@@ -49,6 +82,19 @@ public class DataObjectTranslator {
 				.getColumnIndex(DbOpenHelper.SENSORS_ADDRESS)));
 		sensor.setValue(cursor.getFloat(cursor
 				.getColumnIndex(DbOpenHelper.SENSORS_VALUE)));
+
+		SensorCalibration calibration = new SensorCalibration();
+		
+		calibration.setInputLow(cursor.getFloat(cursor
+				.getColumnIndex(DbOpenHelper.SENSORS_CALIBRATION_INPUT_LOW)));
+		calibration.setInputHigh(cursor.getFloat(cursor
+				.getColumnIndex(DbOpenHelper.SENSORS_CALIBRATION_INPUT_HIGH)));
+		calibration.setOutputLow(cursor.getFloat(cursor
+				.getColumnIndex(DbOpenHelper.SENSORS_CALIBRATION_OUTPUT_LOW)));
+		calibration.setOutputHigh(cursor.getFloat(cursor
+				.getColumnIndex(DbOpenHelper.SENSORS_CALIBRATION_OUTPUT_HIGH)));
+
+		sensor.setCalibration(calibration);
 
 		return sensor;
 	}

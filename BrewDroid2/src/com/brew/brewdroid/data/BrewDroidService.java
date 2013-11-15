@@ -29,6 +29,7 @@ import com.brew.lib.model.CHANNEL_PERMISSION;
 import com.brew.lib.model.LogMessage;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
+import com.brew.lib.model.SensorSettingsTransport;
 import com.brew.lib.model.ServerInfo;
 import com.brew.lib.model.SwitchTransport;
 import com.brew.lib.model.User;
@@ -63,6 +64,7 @@ public class BrewDroidService extends Service {
 
 	public static String ACTION_CLOSE = "actionClose";
 
+	public static String ACTION_UPDATE_SENSOR_SETTING = "actionUpdateSensorSetting";
 	public static String ACTION_SUBSCRIBE = "actionSubscribe";
 	public static String ACTION_UNSUBSCRIBE = "actionUnsubscribe";
 	public static String ACTION_LOGIN = "actionLogin";
@@ -75,6 +77,12 @@ public class BrewDroidService extends Service {
 	public static String BUNDLE_AUTH_RESULT = "bundleAuthResult";
 	public static String BUNDLE_SWITCH_ID = "bundleSwitchId";
 	public static String BUNDLE_SWITCH_VALUE = "bundleSwitchValue";
+
+	public static String BUNDLE_SENSOR_CALIBRATION_INPUT_LOW = "bundleSensorCalibrationInputLow";
+	public static String BUNDLE_SENSOR_CALIBRATION_INPUT_HIGH = "bundleSensorCalibrationInputHigh";
+	public static String BUNDLE_SENSOR_CALIBRATION_OUTPUT_LOW = "bundleSensorCalibrationOutputLow";
+	public static String BUNDLE_SENSOR_CALIBRATION_OUTPUT_HIGH = "bundleSensorCalibrationOutputHigh";
+	public static String BUNDLE_SENSOR_ADDRESS = "bundleSensorAddress";
 
 	void invokeMethod(Method method, Object[] args) {
 		try {
@@ -280,7 +288,7 @@ public class BrewDroidService extends Service {
 
 					int switchId = bundle.getInt(BUNDLE_SWITCH_ID);
 					boolean isOn = bundle.getBoolean(BUNDLE_SWITCH_VALUE);
-					
+
 					SwitchTransport st = new SwitchTransport();
 					st.setSwitchId(switchId);
 					st.setSwitchValue(isOn);
@@ -294,6 +302,24 @@ public class BrewDroidService extends Service {
 					switches.add(st);
 					data.setSwitchTransports(switches);
 					SocketManager.sendMessage(message);
+
+				}
+
+				else if (intent.getAction()
+						.equals(ACTION_UPDATE_SENSOR_SETTING)) {
+
+					if (!SocketManager.isConnected()) {
+						sendConnectionErrorBroadcast();
+						return;
+					}
+
+					Bundle bundle = intent.getExtras();
+					
+					float inputLow = bundle.getFloat(BUNDLE_SENSOR_CALIBRATION_INPUT_LOW);
+					float inputHigh = bundle.getFloat(BUNDLE_SENSOR_CALIBRATION_INPUT_HIGH);
+					float outputLow = bundle.getFloat(BUNDLE_SENSOR_CALIBRATION_OUTPUT_LOW);
+					float outputHigh = bundle.getFloat(BUNDLE_SENSOR_CALIBRATION_OUTPUT_HIGH);
+					String address = bundle.getString(BUNDLE_SENSOR_ADDRESS);
 
 				}
 
@@ -479,9 +505,6 @@ public class BrewDroidService extends Service {
 		@Override
 		public void onAuthResult(boolean success) {
 
-			// Toast.makeText(BrewDroidService.this, "Login success:" + success,
-			// Toast.LENGTH_SHORT).show();
-
 			Intent intent = new Intent(ACTION_AUTH_RESULT);
 			intent.putExtra(BUNDLE_AUTH_RESULT, success);
 			sendBroadcast(intent);
@@ -496,7 +519,14 @@ public class BrewDroidService extends Service {
 
 		@Override
 		public void onSensorSettingsReceived(BrewData brewData) {
-			// TODO Auto-generated method stub
+
+			List<SensorSettingsTransport> sensorSettings = brewData
+					.getSensorSettings();
+
+			if (sensorSettings != null) {
+				BrewDroidContentProvider.updateSensorSettings(null,
+						BrewDroidService.this, sensorSettings);
+			}
 
 		}
 
