@@ -22,6 +22,10 @@ public class SensorSettingsTransport {
 		address = sensor.getAddress();
 	}
 
+	public SensorSettingsTransport() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public Float getValue() {
 		return value;
 	}

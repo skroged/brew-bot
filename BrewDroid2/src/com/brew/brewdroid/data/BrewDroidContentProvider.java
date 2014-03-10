@@ -11,11 +11,14 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 
+import com.brew.lib.model.DeviceAddress;
 import com.brew.lib.model.Sensor;
 import com.brew.lib.model.SensorSettingsTransport;
 import com.brew.lib.model.SensorTransport;
 import com.brew.lib.model.Switch;
 import com.brew.lib.model.SwitchTransport;
+import com.brew.lib.model.User;
+import com.brew.lib.model.UserChannelPermission;
 
 public class BrewDroidContentProvider extends ContentProvider {
 
@@ -29,11 +32,26 @@ public class BrewDroidContentProvider extends ContentProvider {
 	public static final Uri SWITCHES_URI = Uri.parse("content://" + AUTHORITY
 			+ "/" + DbOpenHelper.SWITCHES_TABLE_NAME);
 
+	public static final Uri DEVICE_ADDRESSES_URI = Uri.parse("content://"
+			+ AUTHORITY + "/" + DbOpenHelper.DEVICE_ADDRESSES_TABLE_NAME);
+
+	public static final Uri USERS_URI = Uri.parse("content://" + AUTHORITY
+			+ "/" + DbOpenHelper.USERS_TABLE_NAME);
+
+	public static final Uri PERMISSIONS_URI = Uri.parse("content://"
+			+ AUTHORITY + "/" + DbOpenHelper.PERMISSIONS_TABLE_NAME);
+
 	public static final int SENSORS = 1;
 	public static final int SENSOR = 2;
 
 	public static final int SWITCHES = 3;
 	public static final int SWITCH = 4;
+
+	public static final int DEVICE_ADDRESSES = 5;
+
+	public static final int USERS = 6;
+
+	public static final int PERMISSIONS = 7;
 
 	private static final UriMatcher sUriMatcher = buildUriMatcher();
 
@@ -51,12 +69,33 @@ public class BrewDroidContentProvider extends ContentProvider {
 		matcher.addURI(AUTHORITY, DbOpenHelper.SWITCHES_TABLE_NAME + "/#",
 				SWITCH);
 
+		matcher.addURI(AUTHORITY, DbOpenHelper.DEVICE_ADDRESSES_TABLE_NAME,
+				DEVICE_ADDRESSES);
+
+		matcher.addURI(AUTHORITY, DbOpenHelper.USERS_TABLE_NAME, USERS);
+
+		matcher.addURI(AUTHORITY, DbOpenHelper.PERMISSIONS_TABLE_NAME,
+				PERMISSIONS);
+
 		return matcher;
 	}
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		return 0;
+
+		int count = 0;
+
+		switch (sUriMatcher.match(uri)) {
+
+		case DEVICE_ADDRESSES:
+			count = mDbOpenHelper.deleteAllDeviceAddresses();
+			break;
+		}
+
+		getContext().getContentResolver().notifyChange(uri, null);
+
+		return count;
+
 	}
 
 	@Override
@@ -77,7 +116,18 @@ public class BrewDroidContentProvider extends ContentProvider {
 		case SWITCHES:
 			count = mDbOpenHelper.insertSwitches(values);
 			break;
+		case DEVICE_ADDRESSES:
+			count = mDbOpenHelper.insertDeviceAddresses(values);
+			break;
+		case USERS:
+			count = mDbOpenHelper.insertUsers(values);
+			break;
+		case PERMISSIONS:
+			count = mDbOpenHelper.insertPermissions(values);
+			break;
 		}
+
+		getContext().getContentResolver().notifyChange(uri, null);
 
 		return count;
 	}
@@ -92,6 +142,9 @@ public class BrewDroidContentProvider extends ContentProvider {
 			break;
 		case SWITCHES:
 			mDbOpenHelper.insertSwitch(values);
+			break;
+		case DEVICE_ADDRESSES:
+			mDbOpenHelper.insertDeviceAddress(values);
 			break;
 		}
 
@@ -127,6 +180,16 @@ public class BrewDroidContentProvider extends ContentProvider {
 			selection = DbOpenHelper.SWITCHES_ID + " = ?";
 			selectionArgs = new String[] { uri.getLastPathSegment() };
 			return mDbOpenHelper.querySwitches(selection, selectionArgs);
+
+		case DEVICE_ADDRESSES:
+			return mDbOpenHelper.queryDeviceAddresses(null, null);
+
+		case USERS:
+			return mDbOpenHelper.queryUsers(null, null);
+
+		case PERMISSIONS:
+			return mDbOpenHelper.queryPermissions(selection, selectionArgs);
+
 		}
 
 		return null;
@@ -172,6 +235,117 @@ public class BrewDroidContentProvider extends ContentProvider {
 		getContext().getContentResolver().notifyChange(uri, null);
 
 		return count;
+
+	}
+
+	public static void insertPermissions(Context context,
+			List<UserChannelPermission> permissions,
+			BulkInsertListener insertListener) {
+
+		ContentValues[] values = new ContentValues[permissions.size()];
+
+		for (int i = 0; i < permissions.size(); i++) {
+			UserChannelPermission permission = permissions.get(i);
+			ContentValues cv = DataObjectTranslator
+					.getContentValuesFromPermission(permission);
+			values[i] = cv;
+		}
+
+		new BulkInsertTask(insertListener, context, PERMISSIONS_URI, values)
+				.execute();
+	}
+
+	public static void queryPermissions(QueryListener queryListener,
+			Context context) {
+
+		new QueryTask(queryListener, context, PERMISSIONS_URI, null, null, null)
+				.execute();
+	}
+
+	public static void queryPermissionsForUserId(QueryListener queryListener,
+			Context context, int userId) {
+
+		String[] selectionArgs = { userId + "" };
+		String selection = DbOpenHelper.PERMISSIONS_USER_ID + " = ?";
+		new QueryTask(queryListener, context, PERMISSIONS_URI, selectionArgs,
+				selection, null).execute();
+	}
+
+	public static void registerPermissionsContentObserver(Context context,
+			ContentObserver observer) {
+
+		context.getContentResolver().registerContentObserver(USERS_URI, false,
+				observer);
+
+	}
+
+	public static void insertUsers(Context context, List<User> users,
+			BulkInsertListener insertListener) {
+
+		ContentValues[] values = new ContentValues[users.size()];
+
+		for (int i = 0; i < users.size(); i++) {
+			User user = users.get(i);
+			ContentValues cv = DataObjectTranslator
+					.getContentValuesFromUser(user);
+			values[i] = cv;
+		}
+
+		new BulkInsertTask(insertListener, context, USERS_URI, values)
+				.execute();
+	}
+
+	public static void queryUsers(QueryListener queryListener, Context context) {
+
+		new QueryTask(queryListener, context, USERS_URI, null, null, null)
+				.execute();
+	}
+
+	public static void registerUsersContentObserver(Context context,
+			ContentObserver observer) {
+
+		context.getContentResolver().registerContentObserver(USERS_URI, false,
+				observer);
+
+	}
+
+	public static void deleteAllDeviceAddresses(Context context,
+			DeleteListener deleteListener) {
+
+		new DeleteTask(deleteListener, context, DEVICE_ADDRESSES_URI, null,
+				null).execute();
+
+	}
+
+	public static void insertDeviceAddresses(Context context,
+			List<DeviceAddress> deviceAddresses,
+			BulkInsertListener insertListener) {
+
+		ContentValues[] values = new ContentValues[deviceAddresses.size()];
+
+		for (int i = 0; i < deviceAddresses.size(); i++) {
+			DeviceAddress deviceAddress = deviceAddresses.get(i);
+			ContentValues cv = DataObjectTranslator
+					.getContentValuesFromDeviceAddress(deviceAddress);
+			values[i] = cv;
+		}
+
+		new BulkInsertTask(insertListener, context, DEVICE_ADDRESSES_URI,
+				values).execute();
+	}
+
+	public static void queryDeviceAddresses(QueryListener queryListener,
+			Context context) {
+
+		new QueryTask(queryListener, context, DEVICE_ADDRESSES_URI, null, null,
+				null).execute();
+	}
+
+	public static void registerDeviceAddressesContentObserver(Context context,
+			ContentObserver observer) {
+
+		context.getContentResolver().registerContentObserver(
+				DEVICE_ADDRESSES_URI, false, observer);
 
 	}
 
@@ -417,6 +591,14 @@ public class BrewDroidContentProvider extends ContentProvider {
 
 	}
 
+	public static void registerSwitchesContentObserver(Context context,
+			ContentObserver observer) {
+
+		context.getContentResolver().registerContentObserver(SWITCHES_URI,
+				false, observer);
+
+	}
+
 	// ////////////////////
 
 	public static void unregisterContentObserver(Context context,
@@ -523,6 +705,40 @@ public class BrewDroidContentProvider extends ContentProvider {
 
 	};
 
+	private static class DeleteTask extends AsyncTask<Void, Void, Integer> {
+
+		private DeleteListener mListener;
+		private Uri mUri;
+		private String[] mSelectionArgs;
+		private String mWhere;
+		private Context mContext;
+
+		public DeleteTask(DeleteListener deleteListener, Context context,
+				Uri uri, String[] selectionArgs, String where) {
+			mListener = deleteListener;
+			mContext = context;
+			mSelectionArgs = selectionArgs;
+			mWhere = where;
+			mUri = uri;
+		}
+
+		@Override
+		protected Integer doInBackground(Void... params) {
+
+			return mContext.getContentResolver().delete(mUri, mWhere,
+					mSelectionArgs);
+		}
+
+		@Override
+		protected void onPostExecute(Integer count) {
+			if (mListener != null) {
+				mListener.onComplete(count);
+			}
+			super.onPostExecute(count);
+		}
+
+	};
+
 	private static class QueryTask extends AsyncTask<Void, Void, Cursor> {
 
 		private QueryListener mListener;
@@ -546,19 +762,26 @@ public class BrewDroidContentProvider extends ContentProvider {
 		@Override
 		protected Cursor doInBackground(Void... params) {
 
+			if (mContext == null) {
+				return null;
+			}
 			return mContext.getContentResolver().query(mUri, null, mSelection,
 					mSelectionArgs, mSortOrder);
 		}
 
 		@Override
 		protected void onPostExecute(Cursor cursor) {
-			if (mListener != null) {
+			if (mListener != null && cursor != null) {
 				mListener.onComplete(cursor);
 			}
 			super.onPostExecute(cursor);
 		}
 
 	};
+
+	public static interface DeleteListener {
+		public void onComplete(int count);
+	}
 
 	public static interface UpdateListener {
 		public void onComplete(int count);

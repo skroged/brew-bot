@@ -4,11 +4,13 @@ import java.util.List;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.brew.lib.model.SENSOR_NAME;
 import com.brew.lib.model.Sensor;
 
 public class SensorSettingsView extends RelativeLayout {
@@ -69,8 +71,9 @@ public class SensorSettingsView extends RelativeLayout {
 
 			case R.id.editLowButton:
 
-				sensorSettingsViewListener.onEditLowClicked(SensorSettingsView.this);
-				
+				sensorSettingsViewListener
+						.onEditLowClicked(SensorSettingsView.this);
+
 				// SensorCalibrationEditDialog dialogLow = new
 				// SensorCalibrationEditDialog(
 				// getContext(), sensor.getCalibration().getInputLow(),
@@ -98,8 +101,9 @@ public class SensorSettingsView extends RelativeLayout {
 
 			case R.id.editHighButton:
 
-				sensorSettingsViewListener.onEditHighClicked(SensorSettingsView.this);
-				
+				sensorSettingsViewListener
+						.onEditHighClicked(SensorSettingsView.this);
+
 				// SensorCalibrationEditDialog dialogHigh = new
 				// SensorCalibrationEditDialog(
 				// getContext(), sensor.getCalibration().getInputHigh(),
@@ -127,7 +131,8 @@ public class SensorSettingsView extends RelativeLayout {
 
 			case R.id.editAddressButton:
 
-				sensorSettingsViewListener.onEditAddressClicked(SensorSettingsView.this);
+				sensorSettingsViewListener
+						.onEditAddressClicked(SensorSettingsView.this);
 				// String[] addresses = new String[oneWireAddresses.size()];
 				//
 				// for (int i = 0; i < addresses.length; i++) {
@@ -155,7 +160,7 @@ public class SensorSettingsView extends RelativeLayout {
 
 		}
 
-	};
+	}; 
 
 	public void setSensorSettingsViewListener(
 			SensorSettingsViewListener sensorSettingsViewListener) {
@@ -165,21 +170,30 @@ public class SensorSettingsView extends RelativeLayout {
 	public void setSensor(Sensor sensor) {
 		this.sensor = sensor;
 
-		if (!inLowText.isFocused()) {
-			inLowText.setText(sensor.getCalibration().getInputLow() + "");
+		// if (!inLowText.isFocused()) {
+		// inLowText.setText(sensor.getCalibration().getInputLow() + "");
+		// }
+		// if (!outLowText.isFocused()) {
+		// outLowText.setText(sensor.getCalibration().getOutputLow() + "");
+		// }
+		// if (!inHighText.isFocused()) {
+		// inHighText.setText(sensor.getCalibration().getInputHigh() + "");
+		// }
+		// if (!outHighText.isFocused()) {
+		// outHighText.setText(sensor.getCalibration().getOutputHigh() + "");
+		// }
+		// if (!addressText.isFocused()) {
+		// addressText.setText(sensor.getAddress());
+		// }
+
+		if (sensor.getSensorName() == SENSOR_NAME.HLT_TEMP) {
+			Log.i("JOSH", "address: " + sensor.getAddress());
 		}
-		if (!outLowText.isFocused()) {
-			outLowText.setText(sensor.getCalibration().getOutputLow() + "");
-		}
-		if (!inHighText.isFocused()) {
-			inHighText.setText(sensor.getCalibration().getInputHigh() + "");
-		}
-		if (!outHighText.isFocused()) {
-			outHighText.setText(sensor.getCalibration().getOutputHigh() + "");
-		}
-		if (!addressText.isFocused()) {
-			addressText.setText(sensor.getAddress());
-		}
+		inLowText.setText(sensor.getCalibration().getInputLow() + "");
+		outLowText.setText(sensor.getCalibration().getOutputLow() + "");
+		inHighText.setText(sensor.getCalibration().getInputHigh() + "");
+		outHighText.setText(sensor.getCalibration().getOutputHigh() + "");
+		addressText.setText(sensor.getAddress());
 
 		nameText.setText(sensor.getSensorName().toString());
 		rawValueText.setText(sensor.getValue() + "");
@@ -197,7 +211,9 @@ public class SensorSettingsView extends RelativeLayout {
 
 	public static interface SensorSettingsViewListener {
 		public void onEditHighClicked(SensorSettingsView sender);
+
 		public void onEditLowClicked(SensorSettingsView sender);
+
 		public void onEditAddressClicked(SensorSettingsView sender);
 	}
 

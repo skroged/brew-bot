@@ -24,6 +24,7 @@ public class HomeScreen extends Activity {
 	private LoginUserFragment mLoginFragment;
 	private BrewControlFragment mBrewControlFragment;
 	private SensorSettingsFragment mSensorSettingsFragment;
+	private UsersFragment mUsersFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +32,7 @@ public class HomeScreen extends Activity {
 		setContentView(R.layout.activity_home_screen);
 
 		mNavigationItems = new String[] { "Service Control", "Login",
-				"Brew Control", "Sensor Settings" };
+				"Brew Control", "Sensor Settings", "Users" };
 
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
@@ -66,7 +67,9 @@ public class HomeScreen extends Activity {
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 
-		goToServiceControlFragment();
+		if (savedInstanceState == null) {
+			goToServiceControlFragment();
+		}
 	}
 
 	@Override
@@ -165,6 +168,22 @@ public class HomeScreen extends Activity {
 
 	}
 
+	private void gotoUsersFragment() {
+
+		if (mUsersFragment == null) {
+			mUsersFragment = UsersFragment.instantiate();
+		}
+
+		if (getFragmentManager().findFragmentById(R.id.content_frame) == mSensorSettingsFragment) {
+			return;
+		}
+
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		ft.replace(R.id.content_frame, mUsersFragment);
+		ft.commit();
+
+	}
+
 	private void selectItem(int position) {
 
 		if (position == 0) {
@@ -176,6 +195,8 @@ public class HomeScreen extends Activity {
 			gotoBrewControlFragment();
 		} else if (position == 3) {
 			gotoSensorSettingsFragment();
+		} else if (position == 4) {
+			gotoUsersFragment();
 		}
 		// // Create a new fragment and specify the planet to show based on
 		// // position

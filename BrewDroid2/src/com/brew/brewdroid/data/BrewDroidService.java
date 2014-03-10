@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import android.app.Notification;
@@ -16,9 +18,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.brew.brewdroid.HomeScreen;
 import com.brew.brewdroid.R;
+import com.brew.brewdroid.data.BrewDroidContentProvider.BulkInsertListener;
+import com.brew.brewdroid.data.BrewDroidContentProvider.DeleteListener;
 import com.brew.brewdroid.socket.SocketManager;
 import com.brew.brewdroid.socket.SocketManager.SocketManagerListener;
 import com.brew.brewdroid.util.BrewDroidUtil;
@@ -26,14 +31,15 @@ import com.brew.lib.model.ApkPacket;
 import com.brew.lib.model.BrewData;
 import com.brew.lib.model.BrewMessage;
 import com.brew.lib.model.CHANNEL_PERMISSION;
+import com.brew.lib.model.DeviceAddress;
 import com.brew.lib.model.LogMessage;
+import com.brew.lib.model.SENSOR_TYPE;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.SensorSettingsTransport;
 import com.brew.lib.model.ServerInfo;
 import com.brew.lib.model.SwitchTransport;
 import com.brew.lib.model.User;
-import com.brew.lib.util.BrewHelper;
 
 /**
  * This is an example of implementing an application service that can run in the
@@ -68,8 +74,11 @@ public class BrewDroidService extends Service {
 	public static String ACTION_SUBSCRIBE = "actionSubscribe";
 	public static String ACTION_UNSUBSCRIBE = "actionUnsubscribe";
 	public static String ACTION_LOGIN = "actionLogin";
+	public static String ACTION_LOGOUT = "actionLogout";
 	public static String ACTION_AUTH_RESULT = "actionAuthResult";
 	public static String ACTION_SWITCH_UPDATE = "actionSwitchUpdate";
+	public static String ACTION_CONNECT_CHANGED = "actionConnectionChanged";
+	public static String ACTION_PING_RESULT = "actionPingResult";
 
 	public static String BUNDLE_CHANNEL = "bundleChannel";
 	public static String BUNDLE_USERNAME = "bundleUsername";
@@ -78,11 +87,16 @@ public class BrewDroidService extends Service {
 	public static String BUNDLE_SWITCH_ID = "bundleSwitchId";
 	public static String BUNDLE_SWITCH_VALUE = "bundleSwitchValue";
 
+	public static String BUNDLE_SENSOR_ID = "bundleSensorId";
 	public static String BUNDLE_SENSOR_CALIBRATION_INPUT_LOW = "bundleSensorCalibrationInputLow";
 	public static String BUNDLE_SENSOR_CALIBRATION_INPUT_HIGH = "bundleSensorCalibrationInputHigh";
 	public static String BUNDLE_SENSOR_CALIBRATION_OUTPUT_LOW = "bundleSensorCalibrationOutputLow";
 	public static String BUNDLE_SENSOR_CALIBRATION_OUTPUT_HIGH = "bundleSensorCalibrationOutputHigh";
 	public static String BUNDLE_SENSOR_ADDRESS = "bundleSensorAddress";
+
+	public static String BUNDLE_PING_TIME = "pingTime";
+
+	private Timer mPingTimer;
 
 	void invokeMethod(Method method, Object[] args) {
 		try {
@@ -144,6 +158,7 @@ public class BrewDroidService extends Service {
 
 	@Override
 	public void onCreate() {
+
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		try {
 			mStartForeground = getClass().getMethod("startForeground",
@@ -174,6 +189,7 @@ public class BrewDroidService extends Service {
 		// Make sure our notification is gone.
 		stopForegroundCompat(R.string.foreground_service_started);
 		closeSocket();
+		SocketManager.unregisterSocketManagerListener(socketManagerListener);
 	}
 
 	// This is the old onStart method that will be called on the pre-2.0
@@ -237,7 +253,27 @@ public class BrewDroidService extends Service {
 
 					BrewDroidUtil.saveUser(BrewDroidService.this, user);
 
-				} else if (intent.getAction().equals(ACTION_SUBSCRIBE)) {
+				} else if (intent.getAction().equals(ACTION_LOGOUT)) {
+
+					BrewDroidUtil.deleteUser(BrewDroidService.this);
+
+					if (!SocketManager.isConnected()) {
+						sendConnectionErrorBroadcast();
+						return;
+					}
+
+					BrewMessage message = new BrewMessage();
+					message.setMethod(SOCKET_METHOD.LOGOUT_USER);
+
+					SocketManager.sendMessage(message);
+
+					Intent i = new Intent();
+					i.setAction(ACTION_LOGOUT);
+					sendBroadcast(i);
+
+				}
+
+				else if (intent.getAction().equals(ACTION_SUBSCRIBE)) {
 
 					if (!SocketManager.isConnected()) {
 						sendConnectionErrorBroadcast();
@@ -314,12 +350,42 @@ public class BrewDroidService extends Service {
 					}
 
 					Bundle bundle = intent.getExtras();
-					
-					float inputLow = bundle.getFloat(BUNDLE_SENSOR_CALIBRATION_INPUT_LOW);
-					float inputHigh = bundle.getFloat(BUNDLE_SENSOR_CALIBRATION_INPUT_HIGH);
-					float outputLow = bundle.getFloat(BUNDLE_SENSOR_CALIBRATION_OUTPUT_LOW);
-					float outputHigh = bundle.getFloat(BUNDLE_SENSOR_CALIBRATION_OUTPUT_HIGH);
+
+					int id = bundle.getInt(BUNDLE_SENSOR_ID);
+					float inputLow = bundle
+							.getFloat(BUNDLE_SENSOR_CALIBRATION_INPUT_LOW);
+					float inputHigh = bundle
+							.getFloat(BUNDLE_SENSOR_CALIBRATION_INPUT_HIGH);
+					float outputLow = bundle
+							.getFloat(BUNDLE_SENSOR_CALIBRATION_OUTPUT_LOW);
+					float outputHigh = bundle
+							.getFloat(BUNDLE_SENSOR_CALIBRATION_OUTPUT_HIGH);
 					String address = bundle.getString(BUNDLE_SENSOR_ADDRESS);
+
+					BrewMessage message = new BrewMessage();
+					message.setGuaranteeId(UUID.randomUUID().toString());
+					message.setMethod(SOCKET_METHOD.SENSOR_SETTINGS_UPDATE);
+
+					BrewData data = new BrewData();
+
+					List<SensorSettingsTransport> sensorTransports = new ArrayList<SensorSettingsTransport>();
+
+					SensorSettingsTransport sensorTransport = new SensorSettingsTransport();
+
+					sensorTransport.setInputLow(inputLow);
+					sensorTransport.setInputHigh(inputHigh);
+					sensorTransport.setOutputLow(outputLow);
+					sensorTransport.setOutputHigh(outputHigh);
+					sensorTransport.setAddress(address);
+					sensorTransport.setSensorId(id);
+
+					sensorTransports.add(sensorTransport);
+
+					data.setSensorSettings(sensorTransports);
+
+					message.setData(data);
+
+					SocketManager.sendMessage(message);
 
 				}
 
@@ -374,13 +440,29 @@ public class BrewDroidService extends Service {
 		}
 
 		@Override
-		public void onDisconnect() {
-			// TODO Auto-generated method stub
+		public void onDisconnect(boolean disconnectByClient) {
 
+			Intent i = new Intent(ACTION_CONNECT_CHANGED);
+			sendBroadcast(i);
+			stopSelf();
+
+			if (!disconnectByClient) {
+				Intent intent = new Intent(BrewDroidService.ACTION_FOREGROUND);
+				intent.setClass(BrewDroidService.this, BrewDroidService.class);
+				startService(intent);
+			}
+
+			if (mPingTimer != null) {
+				mPingTimer.cancel();
+				mPingTimer.purge();
+			}
 		}
 
 		@Override
 		public void onConnect() {
+
+			Intent i = new Intent(ACTION_CONNECT_CHANGED);
+			sendBroadcast(i);
 
 			NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
 					BrewDroidService.this).setSmallIcon(R.drawable.ic_launcher)
@@ -398,6 +480,14 @@ public class BrewDroidService extends Service {
 			startForeground(2, notification);
 
 			loginSavedUser();
+
+			if (mPingTimer != null) {
+				mPingTimer.cancel();
+				mPingTimer.purge();
+			}
+
+			mPingTimer = new Timer();
+			mPingTimer.scheduleAtFixedRate(new PingTimerTask(), 0, 2000);
 		}
 
 		@Override
@@ -499,15 +589,78 @@ public class BrewDroidService extends Service {
 		@Override
 		public void onPingReturned(long time) {
 			// TODO Auto-generated method stub
+			Intent i = new Intent(ACTION_PING_RESULT);
+			i.putExtra(BUNDLE_PING_TIME, time);
+			sendBroadcast(i);
+
+			NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+					BrewDroidService.this)
+					.setSmallIcon(R.drawable.ic_launcher)
+					.setContentTitle("Brew Service")
+					.setContentText(
+							"Connected to Brew Bot.\n Ping: " + time + " ms.");
+
+			PendingIntent contentIntent = PendingIntent.getActivity(
+					BrewDroidService.this, 0, new Intent(BrewDroidService.this,
+							HomeScreen.class), 0);
+
+			mBuilder.setContentIntent(contentIntent);
+
+			Notification notification = mBuilder.build();
+
+			startForeground(2, notification);
 
 		}
 
 		@Override
-		public void onAuthResult(boolean success) {
+		public void onAuthResult(final boolean success, final User user) {
 
-			Intent intent = new Intent(ACTION_AUTH_RESULT);
-			intent.putExtra(BUNDLE_AUTH_RESULT, success);
-			sendBroadcast(intent);
+			final List<User> users = new ArrayList<User>();
+			users.add(user);
+
+			BulkInsertListener insertListener = new BulkInsertListener() {
+
+				@Override
+				public void onComplete(int count) {
+
+					for (User user : users) {
+						if (user.getPermissions() != null) {
+
+							BrewDroidContentProvider.insertPermissions(
+									BrewDroidService.this,
+									user.getPermissions(), null);
+						}
+					}
+
+				}
+
+			};
+
+			BrewDroidContentProvider.insertUsers(BrewDroidService.this, users,
+					insertListener);
+
+			handler.post(new Runnable() {
+
+				@Override
+				public void run() {
+					Toast.makeText(BrewDroidService.this,
+							"Login " + (success ? "success" : "fail"),
+							Toast.LENGTH_SHORT).show();
+
+					if (success) {
+						BrewDroidUtil.setUserId(BrewDroidService.this,
+								user.getId());
+					} else {
+						BrewDroidUtil.deleteUser(BrewDroidService.this);
+					}
+
+					Intent intent = new Intent(ACTION_AUTH_RESULT);
+					intent.putExtra(BUNDLE_AUTH_RESULT, success);
+					sendBroadcast(intent);
+
+				}
+
+			});
 
 		}
 
@@ -518,7 +671,37 @@ public class BrewDroidService extends Service {
 		}
 
 		@Override
-		public void onSensorSettingsReceived(BrewData brewData) {
+		public void onSensorSettingsReceived(final BrewData brewData) {
+
+			if (brewData.getOneWireAddresses() != null) {
+
+				DeleteListener deleteListener = new DeleteListener() {
+
+					@Override
+					public void onComplete(int count) {
+
+						List<DeviceAddress> deviceAddresses = new ArrayList<DeviceAddress>();
+
+						for (String address : brewData.getOneWireAddresses()) {
+							DeviceAddress deviceAddress = new DeviceAddress();
+							deviceAddress.setAddress(address);
+							deviceAddress.setType(SENSOR_TYPE.ONE_WIRE);
+							deviceAddresses.add(deviceAddress);
+						}
+
+						BulkInsertListener insertListener = null;
+						BrewDroidContentProvider.insertDeviceAddresses(
+								BrewDroidService.this, deviceAddresses,
+								insertListener);
+
+					}
+
+				};
+
+				BrewDroidContentProvider.deleteAllDeviceAddresses(
+						BrewDroidService.this, deleteListener);
+
+			}
 
 			List<SensorSettingsTransport> sensorSettings = brewData
 					.getSensorSettings();
@@ -532,7 +715,31 @@ public class BrewDroidService extends Service {
 
 		@Override
 		public void onUsersReceived(BrewData brewData) {
-			// TODO Auto-generated method stub
+			if (brewData != null && brewData.getUsers() != null) {
+
+				final List<User> users = brewData.getUsers();
+
+				BulkInsertListener insertListener = new BulkInsertListener() {
+
+					@Override
+					public void onComplete(int count) {
+
+						for (User user : users) {
+							if (user.getPermissions() != null) {
+
+								BrewDroidContentProvider.insertPermissions(
+										BrewDroidService.this,
+										user.getPermissions(), null);
+							}
+						}
+
+					}
+
+				};
+				BrewDroidContentProvider.insertUsers(BrewDroidService.this,
+						users, insertListener);
+
+			}
 
 		}
 
@@ -552,12 +759,26 @@ public class BrewDroidService extends Service {
 
 	private void loginSavedUser() {
 		User user = BrewDroidUtil.getSavedUser(BrewDroidService.this);
-
+		if (user == null) {
+			return;
+		}
 		Intent intent = new Intent(BrewDroidService.ACTION_LOGIN);
 		intent.putExtra(BrewDroidService.BUNDLE_USERNAME, user.getUsername());
 		intent.putExtra(BrewDroidService.BUNDLE_PASSWORD, user.getPassword());
 		intent.setClass(BrewDroidService.this, BrewDroidService.class);
 		BrewDroidService.this.startService(intent);
+	}
+
+	private static class PingTimerTask extends TimerTask {
+
+		@Override
+		public void run() {
+			BrewMessage message = new BrewMessage();
+			message.setMethod(SOCKET_METHOD.PING);
+			message.setGuaranteeId(UUID.randomUUID().toString());
+			SocketManager.sendMessage(message);
+		}
+
 	}
 
 }

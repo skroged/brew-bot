@@ -4,7 +4,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 
+import com.brew.lib.model.CHANNEL_PERMISSION;
+import com.brew.lib.model.DeviceAddress;
 import com.brew.lib.model.SENSOR_NAME;
+import com.brew.lib.model.SENSOR_TYPE;
+import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SWITCH_NAME;
 import com.brew.lib.model.Sensor;
 import com.brew.lib.model.SensorCalibration;
@@ -12,8 +16,38 @@ import com.brew.lib.model.SensorSettingsTransport;
 import com.brew.lib.model.SensorTransport;
 import com.brew.lib.model.Switch;
 import com.brew.lib.model.SwitchTransport;
+import com.brew.lib.model.User;
+import com.brew.lib.model.UserChannelPermission;
 
 public class DataObjectTranslator {
+
+	public static ContentValues getContentValuesFromDeviceAddress(
+			DeviceAddress deviceAddress) {
+
+		ContentValues values = new ContentValues();
+
+		values.put(DbOpenHelper.DEVICE_ADDRESSES_ADDRESS,
+				deviceAddress.getAddress());
+		values.put(DbOpenHelper.DEVICE_ADDRESSES_TYPE, deviceAddress.getType()
+				.toString());
+
+		return values;
+	}
+
+	public static DeviceAddress getDeviceAddressFromCursor(Cursor cursor) {
+
+		DeviceAddress deviceAddress = new DeviceAddress();
+
+		String address = cursor.getString(cursor
+				.getColumnIndex(DbOpenHelper.DEVICE_ADDRESSES_ADDRESS));
+		String typeStr = cursor.getString(cursor
+				.getColumnIndex(DbOpenHelper.DEVICE_ADDRESSES_TYPE));
+
+		deviceAddress.setAddress(address);
+		deviceAddress.setType(SENSOR_TYPE.valueOf(typeStr));
+
+		return deviceAddress;
+	}
 
 	public static ContentValues getContentValuesFromSensor(Sensor sensor) {
 
@@ -56,6 +90,10 @@ public class DataObjectTranslator {
 
 		values.put(DbOpenHelper.SENSORS_ID, sensor.getSensorId());
 		values.put(DbOpenHelper.SENSORS_VALUE, sensor.getCalibratedValue());
+		values.put(DbOpenHelper.SENSORS_VALUE, sensor.getValue());
+		values.put(DbOpenHelper.SENSORS_ADDRESS, sensor.getAddress());		
+		values.put(DbOpenHelper.SENSORS_VALUE_CALIBRATED,
+				sensor.getCalibratedValue());
 		values.put(DbOpenHelper.SENSORS_CALIBRATION_INPUT_LOW,
 				sensor.getInputLow());
 		values.put(DbOpenHelper.SENSORS_CALIBRATION_INPUT_HIGH,
@@ -82,9 +120,11 @@ public class DataObjectTranslator {
 				.getColumnIndex(DbOpenHelper.SENSORS_ADDRESS)));
 		sensor.setValue(cursor.getFloat(cursor
 				.getColumnIndex(DbOpenHelper.SENSORS_VALUE)));
+		sensor.setCalibratedValue(cursor.getFloat(cursor
+				.getColumnIndex(DbOpenHelper.SENSORS_VALUE_CALIBRATED)));
 
 		SensorCalibration calibration = new SensorCalibration();
-		
+
 		calibration.setInputLow(cursor.getFloat(cursor
 				.getColumnIndex(DbOpenHelper.SENSORS_CALIBRATION_INPUT_LOW)));
 		calibration.setInputHigh(cursor.getFloat(cursor
@@ -140,5 +180,63 @@ public class DataObjectTranslator {
 				.getColumnIndex(DbOpenHelper.SWITCHES_VALUE)) == 1);
 
 		return switchh;
+	}
+
+	public static ContentValues getContentValuesFromUser(User user) {
+
+		ContentValues values = new ContentValues();
+
+		values.put(DbOpenHelper.USERS_ID, user.getId());
+		values.put(DbOpenHelper.USERS_NAME, user.getName());
+		values.put(DbOpenHelper.USERS_USERNAME, user.getUsername());
+
+		return values;
+	}
+
+	public static User getUserFromCursor(Cursor cursor)
+			throws CursorIndexOutOfBoundsException {
+
+		User user = new User();
+
+		user.setId(cursor.getInt(cursor.getColumnIndex(DbOpenHelper.USERS_ID)));
+		user.setName(cursor.getString(cursor
+				.getColumnIndex(DbOpenHelper.USERS_NAME)));
+		user.setUsername(cursor.getString(cursor
+				.getColumnIndex(DbOpenHelper.USERS_USERNAME)));
+
+		return user;
+	}
+
+	public static ContentValues getContentValuesFromPermission(
+			UserChannelPermission permission) {
+
+		ContentValues values = new ContentValues();
+
+		values.put(DbOpenHelper.PERMISSIONS_ID, permission.getId());
+		values.put(DbOpenHelper.PERMISSIONS_USER_ID, permission.getUserId());
+		values.put(DbOpenHelper.PERMISSIONS_CHANNEL, permission.getChannel()
+				.toString());
+		values.put(DbOpenHelper.PERMISSSION_PERMISSION, permission
+				.getPermission().toString());
+
+		return values;
+	}
+
+	public static UserChannelPermission getPermissionFromCursor(Cursor cursor)
+			throws CursorIndexOutOfBoundsException {
+
+		UserChannelPermission permission = new UserChannelPermission();
+
+		permission.setId(cursor.getInt(cursor
+				.getColumnIndex(DbOpenHelper.PERMISSIONS_ID)));
+		permission.setUserId(cursor.getInt(cursor
+				.getColumnIndex(DbOpenHelper.PERMISSIONS_USER_ID)));
+		permission.setChannel(SOCKET_CHANNEL.valueOf(cursor.getString(cursor
+				.getColumnIndex(DbOpenHelper.PERMISSIONS_CHANNEL))));
+		permission.setPermission(CHANNEL_PERMISSION.valueOf(cursor
+				.getString(cursor
+						.getColumnIndex(DbOpenHelper.PERMISSSION_PERMISSION))));
+
+		return permission;
 	}
 }

@@ -9,6 +9,7 @@ import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
 import com.brew.lib.model.SwitchTransport;
 import com.brew.lib.model.User;
+import com.brew.lib.model.UserChannelPermission;
 import com.brew.server.db.MySqlManager;
 import com.brew.server.socket.SocketChannel;
 import com.brew.server.socket.SocketConnection;
@@ -16,6 +17,7 @@ import com.brew.server.socket.SocketConnection;
 public class UserManager {
 
 	public static void requestUserDump(SocketConnection socketConnection) {
+		
 		List<User> users = MySqlManager.getUsers();
 
 		BrewMessage message = new BrewMessage();

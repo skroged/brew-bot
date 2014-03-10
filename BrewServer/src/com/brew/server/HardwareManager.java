@@ -375,7 +375,7 @@ public class HardwareManager {
 
 				kilt = false;
 
-				Process proc = Runtime.getRuntime().exec("sudo ./Spi_Pressure");
+				Process proc = Runtime.getRuntime().exec("/home/pi/BrewServer/Spi_Pressure");
 
 				BufferedReader stdInput = new BufferedReader(
 						new InputStreamReader(proc.getInputStream()));
@@ -389,8 +389,8 @@ public class HardwareManager {
 				}
 
 				// read any errors from the attempted command
-				//System.out
-				//		.println("Here is the standard error of the command (if any):\n");
+				// System.out
+				// .println("Here is the standard error of the command (if any):\n");
 				while (!kilt && (s = stdError.readLine()) != null) {
 					System.out.println(s);
 				}
@@ -399,8 +399,122 @@ public class HardwareManager {
 
 				stdInput.close();
 				stdError.close();
-				
+
 				Logger.log("SYSTEM", "SPI ended");
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		public void kill() {
+			kilt = true;
+		}
+	}
+
+	// public static class UpdateADCSensorsThread extends Thread {
+	//
+	// private boolean kilt;
+	//
+	// @Override
+	// public synchronized void start() {
+	// super.start();
+	// }
+	//
+	// @Override
+	// public void run() {
+	// try {
+	//
+	// Logger.log("SYSTEM", "Starting ADC");
+	//
+	// kilt = false;
+	//
+	// Process proc = Runtime.getRuntime().exec(
+	// "sudo python /home/pi/BrewServer/I2C/ADC.py");
+	//
+	// BufferedReader stdInput = new BufferedReader(
+	// new InputStreamReader(proc.getInputStream()));
+	//
+	// BufferedReader stdError = new BufferedReader(
+	// new InputStreamReader(proc.getErrorStream()));
+	//
+	//
+	// String s;
+	// while (!kilt && (s = stdInput.readLine()) != null) {
+	// System.out.println("read: " + s);
+	// // updateADCSensorValues(s);
+	// }
+	//
+	// // read any errors from the attempted command
+	// // System.out
+	// // .println("Here is the standard error of the command (if any):\n");
+	// while (!kilt && (s = stdError.readLine()) != null) {
+	// System.out.println(s);
+	// }
+	//
+	// proc.destroy();
+	//
+	// stdInput.close();
+	// stdError.close();
+	//
+	// Logger.log("SYSTEM", "ADC ended");
+	//
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// }
+	// }
+	//
+	// public void kill() {
+	// kilt = true;
+	// }
+	// }
+
+	public static class UpdateADCSensorsThread extends Thread {
+
+		private boolean kilt;
+
+		@Override
+		public synchronized void start() {
+			super.start();
+		}
+
+		@Override
+		public void run() {
+			try {
+
+				Logger.log("SYSTEM", "Starting ADC");
+
+				kilt = false;
+
+				while (!kilt) {
+					Process proc = Runtime.getRuntime().exec(
+							"/usr/bin/python /home/pi/BrewServer/I2C/ADC.py");
+
+					BufferedReader stdInput = new BufferedReader(
+							new InputStreamReader(proc.getInputStream()));
+
+					BufferedReader stdError = new BufferedReader(
+							new InputStreamReader(proc.getErrorStream()));
+
+					String s;
+					while (!kilt && (s = stdInput.readLine()) != null) {
+						// System.out.println("read: " + s);
+						updateADCSensorValues(s);
+					}
+
+					// read any errors from the attempted command
+					// System.out
+					// .println("Here is the standard error of the command (if any):\n");
+					while (!kilt && (s = stdError.readLine()) != null) {
+						System.out.println(s);
+					}
+
+					proc.destroy();
+
+					stdInput.close();
+					stdError.close();
+				}
+				Logger.log("SYSTEM", "ADC ended");
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -475,13 +589,14 @@ public class HardwareManager {
 
 	private static UpdateOneWireThread updateOneWireThread;
 	private static UpdateSPIThread updateSPIThread;
+	private static UpdateADCSensorsThread updateADCSensorsThread;
 
 	public static void startUpdating() {
 
 		try {
-			Process p1 = Runtime.getRuntime().exec("sudo modprobe w1-gpio");
+			Process p1 = Runtime.getRuntime().exec("/sbin/modprobe w1-gpio");
 			p1.waitFor();
-			Process p2 = Runtime.getRuntime().exec("sudo modprobe w1-therm");
+			Process p2 = Runtime.getRuntime().exec("/sbin/modprobe w1-therm");
 			p2.waitFor();
 		} catch (IOException e) {
 			Logger.log("SYSTEM", "failed to enable one-wire");
@@ -497,6 +612,9 @@ public class HardwareManager {
 
 		updateSPIThread = new UpdateSPIThread();
 		updateSPIThread.start();
+
+		updateADCSensorsThread = new UpdateADCSensorsThread();
+		updateADCSensorsThread.start();
 	}
 
 	public static void stopUddating() throws InterruptedException {
@@ -507,6 +625,7 @@ public class HardwareManager {
 
 			updateOneWireThread.join(1000);
 			updateSPIThread.join(1000);
+			updateADCSensorsThread.join(1000);
 		} catch (InterruptedException e) {
 			System.err.println(e.getMessage());
 			throw e;
@@ -575,10 +694,10 @@ public class HardwareManager {
 
 				try {
 					Runtime.getRuntime().exec(
-							"sudo i2cset -y 1 0x25 " + byte1Str);
+							"/usr/sbin/i2cset -y 1 0x25 " + byte1Str);
 
 					Runtime.getRuntime().exec(
-							"sudo i2cset -y 1 0x26 " + byte2Str);
+							"/usr/sbin/i2cset -y 1 0x26 " + byte2Str);
 
 					// System.out.println("sudo i2cset -y 1 0x25 " + byte1Str);
 					// System.out.println("sudo i2cset -y 1 0x26 " + byte2Str);
@@ -721,6 +840,42 @@ public class HardwareManager {
 			}
 		}
 
+	}
+
+	private static void updateADCSensorValues(String valuesJson) {
+
+		JsonParser parser = new JsonParser();
+		JsonObject jo = (JsonObject) parser.parse(valuesJson);
+
+		Set<Entry<String, JsonElement>> set = jo.entrySet();
+		Iterator<Entry<String, JsonElement>> iterator = set.iterator();
+		while (iterator.hasNext()) {
+
+			Entry<String, JsonElement> entry = iterator.next();
+			String sensorAddressStr = entry.getKey();
+
+			for (Sensor sensor : sensors) {
+
+				if (sensor.getAddress().equals(sensorAddressStr)) {
+					// if (sensor.getSensorName() == sensorName) {
+					float rawValue = jo.getAsJsonPrimitive(sensorAddressStr)
+							.getAsFloat();
+
+					// round to nearest 2...
+					int roundedValue = Math.round(rawValue / 2f) * 2;
+
+					boolean changed = sensor.getValue() != roundedValue;
+					if (changed) {
+						Logger.log("DATA", sensor.getSensorName() + ": "
+								+ roundedValue);
+						notifySensorChanged(sensor);
+						sensor.setValue(roundedValue);
+					}
+
+					break;
+				}
+			}
+		}
 	}
 
 	private static void notifySensorChanged(Sensor sensor) {

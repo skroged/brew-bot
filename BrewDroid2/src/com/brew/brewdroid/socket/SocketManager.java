@@ -41,12 +41,15 @@ public class SocketManager {
 
 	private static SocketConnection socketConnection;
 	private static Handler handler;
+	private static long connectTime;
 
 	private static SocketConnectionListener clientSocketListener = new SocketConnectionListener() {
 
 		@Override
 		public void onSocketReady(SocketConnection socketConnection) {
 			// identify();
+
+			connectTime = System.currentTimeMillis();
 
 			synchronized (socketManagerListeners) {
 				for (SocketManagerListener listener : socketManagerListeners) {
@@ -62,11 +65,12 @@ public class SocketManager {
 
 		@Override
 		public void onSocketDisconnected(SocketConnection socketConnection) {
+			Log.i("JOSH", "socekt closed by server");
 			SocketManager.socketConnection = null;
 			synchronized (socketManagerListeners) {
 
 				for (SocketManagerListener listener : socketManagerListeners) {
-					listener.onDisconnect();
+					listener.onDisconnect(disconnectByClient);
 				}
 			}
 
@@ -85,9 +89,14 @@ public class SocketManager {
 	};
 
 	private static Context context;
+	private static boolean disconnectByClient;
 
 	public static boolean isConnected() {
 		return socketConnection != null;
+	}
+
+	public static long getConnectTime() {
+		return connectTime;
 	}
 
 	public static void sendMessage(BrewMessage message) {
@@ -98,7 +107,9 @@ public class SocketManager {
 			new BrewMessageGuarantee(message);
 		}
 
-		socketConnection.sendMessage(json);
+		if (socketConnection != null) {
+			socketConnection.sendMessage(json);
+		}
 	}
 
 	// private static boolean looping;
@@ -162,6 +173,8 @@ public class SocketManager {
 
 	public static void disconnect() {
 
+		disconnectByClient = true;
+
 		if (socketConnection != null) {
 			socketConnection.endThread();
 		}
@@ -178,6 +191,8 @@ public class SocketManager {
 	// private static String serverHost;
 
 	public static void connect(final Context context) {
+
+		disconnectByClient = false;
 
 		if (attemptingToConnect) {
 			return;
@@ -213,11 +228,8 @@ public class SocketManager {
 					SharedPreferences sp = context.getSharedPreferences(
 							"SETTINGS", Context.MODE_PRIVATE);
 
-					// final String serverHost = sp.getString("BREW_SERVER_IP",
-					// "192.168.0.183");
-
 					final String serverHost = sp.getString("BREW_SERVER_IP",
-							"10.112.245.171");
+							"10.0.0.17");
 
 					handler.post(new Runnable() {
 
@@ -416,7 +428,9 @@ public class SocketManager {
 
 			case LOGIN_RESULT:
 
-				if (message.getSuccess() == null) {
+				if (message.getSuccess() == null || message.getData() == null
+						|| message.getData().getUsers() == null
+						|| message.getData().getUsers().size() != 1) {
 					Log.i("JOSH", "bad login result packet");
 					return;
 				}
@@ -424,7 +438,8 @@ public class SocketManager {
 				synchronized (socketManagerListeners) {
 
 					for (SocketManagerListener listener : socketManagerListeners) {
-						listener.onAuthResult(message.getSuccess());
+						listener.onAuthResult(message.getSuccess(), message
+								.getData().getUsers().get(0));
 					}
 				}
 
@@ -432,15 +447,18 @@ public class SocketManager {
 
 			case REGISTER_RESULT:
 
-				if (message.getSuccess() == null) {
-					Log.i("JOSH", "bad register result packet");
+				if (message.getSuccess() == null || message.getData() == null
+						|| message.getData().getUsers() == null
+						|| message.getData().getUsers().size() != 1) {
+					Log.i("JOSH", "bad login result packet");
 					return;
 				}
 
 				synchronized (socketManagerListeners) {
 
 					for (SocketManagerListener listener : socketManagerListeners) {
-						listener.onAuthResult(message.getSuccess());
+						listener.onAuthResult(message.getSuccess(), message
+								.getData().getUsers().get(0));
 					}
 				}
 
@@ -651,7 +669,7 @@ public class SocketManager {
 		public void onSubscribeResult(SOCKET_CHANNEL channel,
 				CHANNEL_PERMISSION permission);
 
-		public void onDisconnect();
+		public void onDisconnect(boolean disconnectByClient);
 
 		public void onConnect();
 
@@ -663,7 +681,7 @@ public class SocketManager {
 
 		public void onPingReturned(long time);
 
-		public void onAuthResult(boolean success);
+		public void onAuthResult(boolean success, User user);
 
 		public void onLogReceived(LogMessage logMessage);
 

@@ -4,29 +4,36 @@ import java.text.NumberFormat;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.brew.brewdroid.data.BrewDroidContentProvider;
 import com.brew.brewdroid.data.BrewDroidContentProvider.QueryListener;
 import com.brew.brewdroid.data.BrewDroidService;
 import com.brew.brewdroid.data.DataObjectTranslator;
+import com.brew.brewdroid.socket.SocketManager;
+import com.brew.brewdroid.util.BrewDroidUtil;
 import com.brew.lib.model.SOCKET_CHANNEL;
-import com.brew.lib.model.SWITCH_NAME;
 import com.brew.lib.model.Sensor;
 import com.brew.lib.model.Switch;
-import com.brew.lib.model.SwitchTransport;
+import com.brew.lib.model.User;
+import com.brew.lib.model.UserChannelPermission;
 
 public class BrewControlFragment extends Fragment {
 
@@ -41,6 +48,8 @@ public class BrewControlFragment extends Fragment {
 	private TextView bkVolumeText;
 
 	private TextView fermTempText;
+
+	private TextView boxTempText;
 
 	private View bkPumpButton;
 	private View bkBurnerButton;
@@ -58,6 +67,8 @@ public class BrewControlFragment extends Fragment {
 	private View hltHltButton;
 
 	private View igniterButton;
+	private View fillButton;
+	private View chillButton;
 
 	private OnOffIndicator bkPumpIndicator;
 	private OnOffIndicator bkBurnerIndicator;
@@ -75,6 +86,8 @@ public class BrewControlFragment extends Fragment {
 	private OnOffIndicator hltHltIndicator;
 
 	private OnOffIndicator igniterIndicator;
+	private OnOffIndicator fillIndicator;
+	private OnOffIndicator chillIndicator;
 
 	private TextView connectedText;
 	private TextView permissionText;
@@ -86,12 +99,61 @@ public class BrewControlFragment extends Fragment {
 		return frag;
 	}
 
+	private void setConnectedState() {
+
+		if (SocketManager.isConnected()) {
+			connectedText.setText("Connected");
+			connectedText.setTextColor(Color.GREEN);
+			permissionText.setVisibility(View.VISIBLE);
+			pingText.setVisibility(View.VISIBLE);
+		} else {
+			connectedText.setText("Disconnected");
+			connectedText.setTextColor(Color.RED);
+			permissionText.setVisibility(View.GONE);
+			pingText.setVisibility(View.GONE);
+		}
+
+		getPermissions();
+
+	}
+
+	private BroadcastReceiver mAuthReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			getPermissions();
+		}
+	};
+
+	private BroadcastReceiver mPingReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			long pingTime = intent.getLongExtra(
+					BrewDroidService.BUNDLE_PING_TIME, -1);
+			pingText.setText("Ping: " + pingTime + " ms");
+		}
+	};
+
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 
-		getAllSensorsCursor();
-		getAllSwitchesCursor();
+		BrewDroidContentProvider.registerSensorsContentObserver(getActivity(),
+				sensorObserver);
+		BrewDroidContentProvider.registerSwitchesContentObserver(activity,
+				switchesContentObserver);
+		activity.registerReceiver(mConnectReceiver, new IntentFilter(
+				BrewDroidService.ACTION_CONNECT_CHANGED));
+
+		IntentFilter authFilter = new IntentFilter(
+				BrewDroidService.ACTION_AUTH_RESULT);
+		authFilter.addAction(BrewDroidService.ACTION_LOGOUT);
+		activity.registerReceiver(mAuthReceiver, authFilter);
+
+		IntentFilter pingFilter = new IntentFilter(
+				BrewDroidService.ACTION_PING_RESULT);
+		activity.registerReceiver(mPingReceiver, pingFilter);
 
 		Intent intent = new Intent(BrewDroidService.ACTION_SUBSCRIBE);
 		intent.putExtra(BrewDroidService.BUNDLE_CHANNEL,
@@ -111,8 +173,53 @@ public class BrewControlFragment extends Fragment {
 		getActivity().startService(intent);
 
 		BrewDroidContentProvider.unregisterContentObserver(getActivity(),
-				sensorContentObserver);
+				sensorObserver);
+		BrewDroidContentProvider.unregisterContentObserver(getActivity(),
+				switchesContentObserver);
+		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(
+				mConnectReceiver);
+		getActivity().unregisterReceiver(mAuthReceiver);
+		getActivity().unregisterReceiver(mPingReceiver);
+
 		super.onDetach();
+	}
+
+	public BroadcastReceiver mConnectReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			setConnectedState();
+		}
+	};
+
+	private QueryListener permissionQueryListener = new QueryListener() {
+
+		@Override
+		public void onComplete(Cursor cursor) {
+
+			if (cursor != null) {
+				while (cursor.moveToNext()) {
+					UserChannelPermission permission = DataObjectTranslator
+							.getPermissionFromCursor(cursor);
+					if (permission.getChannel() == SOCKET_CHANNEL.BREW_CONTROL) {
+						permissionText.setText("Permission: "
+								+ permission.getPermission());
+					}
+				}
+
+			}
+		}
+
+	};
+
+	private void getPermissions() {
+		User user = BrewDroidUtil.getSavedUser(getActivity());
+		if (user != null) {
+			BrewDroidContentProvider.queryPermissionsForUserId(
+					permissionQueryListener, getActivity(), user.getId());
+		} else {
+			permissionText.setText("Not logged in!");
+		}
 	}
 
 	private void getAllSensorsCursor() {
@@ -125,6 +232,10 @@ public class BrewControlFragment extends Fragment {
 		@Override
 		public void onComplete(Cursor cursor) {
 
+			if (getActivity() == null) {
+				return;
+			}
+
 			if (cursor != null) {
 
 				while (cursor.moveToNext()) {
@@ -133,9 +244,6 @@ public class BrewControlFragment extends Fragment {
 						Sensor sensor = DataObjectTranslator
 								.getSensorFromCursor(cursor);
 
-						int sensorId = sensor.getSensorId();
-						BrewDroidContentProvider.registerSensorContentObserver(
-								getActivity(), sensorContentObserver, sensorId);
 						onSensorUpdate(sensor);
 					} catch (CursorIndexOutOfBoundsException e) {
 						e.printStackTrace();
@@ -149,40 +257,17 @@ public class BrewControlFragment extends Fragment {
 
 	};
 
-	private ContentObserver sensorContentObserver = new ContentObserver(handler) {
+	private ContentObserver sensorObserver = new ContentObserver(handler) {
 
 		@Override
-		public void onChange(boolean selfChange, Uri uri) {
-			BrewDroidContentProvider.querySensor(sensorQueryListener,
-					getActivity(), uri);
+		public void onChange(boolean selfChange) {
+			getAllSensorsCursor();
 			super.onChange(selfChange);
 		}
 
 	};
 
-	private QueryListener sensorQueryListener = new QueryListener() {
-
-		@Override
-		public void onComplete(Cursor cursor) {
-			try {
-				while (cursor.moveToNext()) {
-					Sensor sensor = DataObjectTranslator
-							.getSensorFromCursor(cursor);
-					onSensorUpdate(sensor);
-				}
-				cursor.close();
-			} catch (CursorIndexOutOfBoundsException e) {
-				e.printStackTrace();
-			}
-
-		}
-
-	};
-
 	private void onSensorUpdate(Sensor sensor) {
-		Log.i("JOSH",
-				"new value for " + sensor.getSensorName() + ": "
-						+ sensor.getValue());
 
 		NumberFormat nf = NumberFormat.getNumberInstance();
 		nf.setMaximumFractionDigits(2);
@@ -190,23 +275,26 @@ public class BrewControlFragment extends Fragment {
 		switch (sensor.getSensorName()) {
 
 		case HLT_TEMP:
-			hltTempText.setText(nf.format(sensor.getValue()) + " °F");
+			hltTempText.setText(nf.format(sensor.getValue()) + " \u00B0F");
 			break;
 		case HLT_VOLUME:
 			hltVolumeText.setText(nf.format(sensor.getValue()) + " Gal");
 			break;
 		case MLT_TEMP:
-			mltTempText.setText(nf.format(sensor.getValue()) + " °F");
+			mltTempText.setText(nf.format(sensor.getValue()) + " \u00B0F");
 			break;
 		case BK_TEMP:
-			bkTempText.setText(nf.format(sensor.getValue()) + " °F");
+			bkTempText.setText(nf.format(sensor.getValue()) + " \u00B0F");
 			break;
 		case BK_VOLUME:
 			bkVolumeText.setText(nf.format(sensor.getValue()) + " Gal");
 			break;
 		case FERM_TEMP:
-			fermTempText.setText(nf.format(sensor.getValue()) + " °F");
+			fermTempText.setText(nf.format(sensor.getValue()) + " \u00B0F");
 			break;
+		case BOX_TEMP:
+			boxTempText.setText(nf.format(sensor.getValue()) + " \u00B0F");
+			break;			
 		}
 
 	}
@@ -223,6 +311,10 @@ public class BrewControlFragment extends Fragment {
 		@Override
 		public void onComplete(Cursor cursor) {
 
+			if (getActivity() == null) {
+				return;
+			}
+
 			if (cursor != null) {
 
 				while (cursor.moveToNext()) {
@@ -231,9 +323,6 @@ public class BrewControlFragment extends Fragment {
 						Switch switchh = DataObjectTranslator
 								.getSwitchFromCursor(cursor);
 
-						int switchId = switchh.getId();
-						BrewDroidContentProvider.registerSwitchContentObserver(
-								getActivity(), switchContentObserver, switchId);
 						onSwitchUpdate(switchh);
 
 						assignSwitchButtonTag(switchh);
@@ -250,32 +339,13 @@ public class BrewControlFragment extends Fragment {
 
 	};
 
-	private ContentObserver switchContentObserver = new ContentObserver(handler) {
+	private ContentObserver switchesContentObserver = new ContentObserver(
+			handler) {
 
 		@Override
 		public void onChange(boolean selfChange, Uri uri) {
-			BrewDroidContentProvider.querySwitch(switchQueryListener,
-					getActivity(), uri);
+			getAllSwitchesCursor();
 			super.onChange(selfChange);
-		}
-
-	};
-
-	private QueryListener switchQueryListener = new QueryListener() {
-
-		@Override
-		public void onComplete(Cursor cursor) {
-			try {
-				while (cursor.moveToNext()) {
-					Switch switchh = DataObjectTranslator
-							.getSwitchFromCursor(cursor);
-					onSwitchUpdate(switchh);
-				}
-				cursor.close();
-			} catch (CursorIndexOutOfBoundsException e) {
-				e.printStackTrace();
-			}
-
 		}
 
 	};
@@ -309,6 +379,12 @@ public class BrewControlFragment extends Fragment {
 		case IGNITER:
 			igniterButton.setTag(switchh.getId());
 			break;
+		case FILL:
+			fillButton.setTag(switchh.getId());
+			break;
+		case CHILL:
+			chillButton.setTag(switchh.getId());
+			break;
 		case MLT_BK:
 			mltBkButton.setTag(switchh.getId());
 			break;
@@ -325,9 +401,6 @@ public class BrewControlFragment extends Fragment {
 	}
 
 	private void onSwitchUpdate(Switch switchh) {
-		Log.i("JOSH",
-				"new value for " + switchh.getName() + ": "
-						+ switchh.getValue());
 
 		NumberFormat nf = NumberFormat.getNumberInstance();
 		nf.setMaximumFractionDigits(2);
@@ -373,6 +446,12 @@ public class BrewControlFragment extends Fragment {
 		case IGNITER:
 			igniterIndicator.setOn(switchh.getValue());
 			break;
+		case FILL:
+			fillIndicator.setOn(switchh.getValue());
+			break;
+		case CHILL:
+			chillIndicator.setOn(switchh.getValue());
+			break;
 		}
 
 	}
@@ -382,8 +461,15 @@ public class BrewControlFragment extends Fragment {
 		@Override
 		public void onClick(View v) {
 
+			if (v == null || v.getTag() == null) {
+				Toast.makeText(getActivity(), "Something went terribly wrong!",
+						Toast.LENGTH_SHORT).show();
+				return;
+
+			}
 			int switchId = (Integer) v.getTag();
-			boolean isOn = false;;
+			boolean isOn = false;
+			;
 
 			switch (v.getId()) {
 
@@ -438,6 +524,12 @@ public class BrewControlFragment extends Fragment {
 			case R.id.igniterButton:
 				isOn = !igniterIndicator.isOn();
 				break;
+			case R.id.fillButton:
+				isOn = !fillIndicator.isOn();
+				break;
+			case R.id.chillButton:
+				isOn = !chillIndicator.isOn();
+				break;
 			}
 
 			Intent intent = new Intent(BrewDroidService.ACTION_SWITCH_UPDATE);
@@ -469,6 +561,8 @@ public class BrewControlFragment extends Fragment {
 
 		fermTempText = (TextView) v.findViewById(R.id.fermTempText);
 
+		boxTempText = (TextView) v.findViewById(R.id.boxTempText);
+
 		hltPumpButton = v.findViewById(R.id.hltPumpButton);
 		hltBurnerButton = v.findViewById(R.id.hltBurnerButton);
 		hltHltButton = v.findViewById(R.id.hltHltButton);
@@ -485,6 +579,8 @@ public class BrewControlFragment extends Fragment {
 		bkFermButton = v.findViewById(R.id.bkFermButton);
 
 		igniterButton = v.findViewById(R.id.igniterButton);
+		fillButton = v.findViewById(R.id.fillButton);
+		chillButton = v.findViewById(R.id.chillButton);
 
 		hltPumpIndicator = (OnOffIndicator) v
 				.findViewById(R.id.hltPumpIndicator);
@@ -508,6 +604,8 @@ public class BrewControlFragment extends Fragment {
 
 		igniterIndicator = (OnOffIndicator) v
 				.findViewById(R.id.igniterIndicator);
+		fillIndicator = (OnOffIndicator) v.findViewById(R.id.fillIndicator);
+		chillIndicator = (OnOffIndicator) v.findViewById(R.id.chillIndicator);
 
 		hltPumpButton.setOnClickListener(switchClick);
 		hltBurnerButton.setOnClickListener(switchClick);
@@ -525,10 +623,16 @@ public class BrewControlFragment extends Fragment {
 		bkFermButton.setOnClickListener(switchClick);
 
 		igniterButton.setOnClickListener(switchClick);
+		fillButton.setOnClickListener(switchClick);
+		chillButton.setOnClickListener(switchClick);
 
 		v.findViewById(R.id.progressBar1).setVisibility(View.GONE);
 
-		// submitButton.setOnClickListener(clickListener);
+		getAllSensorsCursor();
+		getAllSwitchesCursor();
+		getPermissions();
+
+		setConnectedState();
 
 		return v;
 	}

@@ -82,6 +82,10 @@ public class Sensor {
 		return message;
 	}
 
+	public void setCalibratedValue(float calibratedValue) {
+		this.calibratedValue = calibratedValue;
+	}
+
 	public float getValue() {
 		return value;
 	}
