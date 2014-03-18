@@ -58,6 +58,23 @@ public class UsersFragment extends Fragment {
 
 	}
 
+	@Override
+	public void onDetach() {
+		super.onDetach();
+
+		Intent intent = new Intent(BrewDroidService.ACTION_UNSUBSCRIBE);
+		intent.putExtra(BrewDroidService.BUNDLE_CHANNEL,
+				SOCKET_CHANNEL.USERS.toString());
+		intent.setClass(getActivity(), BrewDroidService.class);
+		getActivity().startService(intent);
+
+		BrewDroidContentProvider.unregisterContentObserver(getActivity(),
+				mUsersContentObserver);
+
+		mUsersCursorAdapter.getCursor().close();
+		mUsersCursorAdapter = null;
+	}
+
 	private ContentObserver mUsersContentObserver = new ContentObserver(
 			mHandler) {
 		@Override
@@ -72,10 +89,13 @@ public class UsersFragment extends Fragment {
 		@Override
 		public void onComplete(Cursor cursor) {
 
-			mUsersCursorAdapter = new UsersCursorAdapter(getActivity(), cursor,
-					mUserViewListener);
-
-			mUsersList.setAdapter(mUsersCursorAdapter);
+			if (mUsersCursorAdapter == null) {
+				mUsersCursorAdapter = new UsersCursorAdapter(getActivity(),
+						cursor, mUserViewListener);
+				mUsersList.setAdapter(mUsersCursorAdapter);
+			} else {
+				mUsersCursorAdapter.changeCursor(cursor);
+			}
 
 		}
 

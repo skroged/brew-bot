@@ -226,23 +226,22 @@ public class SocketManager {
 							+ PORT_NUMBER);
 
 					SharedPreferences sp = context.getSharedPreferences(
-							"SETTINGS", Context.MODE_PRIVATE);
+							"BREW_PREFS", Context.MODE_PRIVATE);
 
-					final String serverHost = sp.getString("BREW_SERVER_IP",
-							"10.0.0.17");
+					final String host = sp.getString("HOST", "");
 
 					handler.post(new Runnable() {
 
 						@Override
 						public void run() {
-							startConnectTimer(serverHost);
+							startConnectTimer(host);
 						}
 
 					});
 
 					clientSocket = new Socket();
-					SocketAddress remoteAddr = new InetSocketAddress(
-							serverHost, PORT_NUMBER);
+					SocketAddress remoteAddr = new InetSocketAddress(host,
+							PORT_NUMBER);
 					clientSocket.connect(remoteAddr, TIMEOUT);
 
 					// clientSocket = new Socket(serverHost, PORT_NUMBER);

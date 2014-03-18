@@ -246,6 +246,66 @@ public class HardwareManager {
 
 	};
 
+	public static class DataDumpThread extends Thread {
+
+		private boolean kilt;
+
+		@Override
+		public synchronized void start() {
+			super.start();
+		}
+
+		@Override
+		public void run() {
+
+			while (!kilt) {
+
+				BrewMessage message = new BrewMessage();
+
+				message.setMethod(SOCKET_METHOD.DATA_UPDATE);
+
+				BrewData data = new BrewData();
+
+				List<SensorTransport> sensorTransports = new ArrayList<SensorTransport>();
+
+				data.setSensors(sensors);
+
+				List<Switch> switchList = new ArrayList<Switch>();
+				Iterator<?> it = switches.entrySet().iterator();
+				while (it.hasNext()) {
+
+					Map.Entry<?, ?> pairs = (Map.Entry<?, ?>) it.next();
+
+					Switch switchh = (Switch) pairs.getValue();
+
+					switchList.add(switchh);
+
+				}
+
+				data.setSwitches(switchList);
+
+				message.setData(data);
+
+				SocketChannel.get(SOCKET_CHANNEL.BREW_CONTROL).sendBroadcast(
+						message);
+
+				SocketChannel.get(SOCKET_CHANNEL.SENSOR_SETTINGS)
+						.sendBroadcast(message);
+
+				try {
+					Thread.sleep(1000 * 3);
+				} catch (InterruptedException e) {
+					kilt = true;
+					e.printStackTrace();
+				}
+			}
+		}
+
+		public void kill() {
+			kilt = true;
+		}
+	}
+
 	public static void requestDataDump(final SocketConnection socket) {
 
 		new Thread() {
@@ -375,7 +435,8 @@ public class HardwareManager {
 
 				kilt = false;
 
-				Process proc = Runtime.getRuntime().exec("/home/pi/BrewServer/Spi_Pressure");
+				Process proc = Runtime.getRuntime().exec(
+						"/home/pi/BrewServer/Spi_Pressure");
 
 				BufferedReader stdInput = new BufferedReader(
 						new InputStreamReader(proc.getInputStream()));
@@ -497,9 +558,22 @@ public class HardwareManager {
 							new InputStreamReader(proc.getErrorStream()));
 
 					String s;
+					long minTime = 200;
 					while (!kilt && (s = stdInput.readLine()) != null) {
 						// System.out.println("read: " + s);
+						long before = System.currentTimeMillis();
 						updateADCSensorValues(s);
+						long after = System.currentTimeMillis();
+						long elapsed = after - before;
+						if (elapsed < minTime) {
+							long sleep = minTime - elapsed;
+							try {
+								Thread.sleep(sleep);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+
 					}
 
 					// read any errors from the attempted command
@@ -559,6 +633,10 @@ public class HardwareManager {
 
 							float value = readOneWireSensorValue(address);
 
+							if (value < 3 || value > 110000) {
+								continue;
+							}
+
 							boolean changed = Math.abs(sensor.getValue()
 									- value) > 0;
 
@@ -590,6 +668,7 @@ public class HardwareManager {
 	private static UpdateOneWireThread updateOneWireThread;
 	private static UpdateSPIThread updateSPIThread;
 	private static UpdateADCSensorsThread updateADCSensorsThread;
+	private static DataDumpThread dataDumpThread;
 
 	public static void startUpdating() {
 
@@ -615,6 +694,11 @@ public class HardwareManager {
 
 		updateADCSensorsThread = new UpdateADCSensorsThread();
 		updateADCSensorsThread.start();
+
+		dataDumpThread = new DataDumpThread();
+		dataDumpThread.start();
+
+		setSwitchHardware();
 	}
 
 	public static void stopUddating() throws InterruptedException {

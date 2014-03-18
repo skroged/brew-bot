@@ -174,7 +174,7 @@ public class HomeScreen extends Activity {
 			mUsersFragment = UsersFragment.instantiate();
 		}
 
-		if (getFragmentManager().findFragmentById(R.id.content_frame) == mSensorSettingsFragment) {
+		if (getFragmentManager().findFragmentById(R.id.content_frame) == mUsersFragment) {
 			return;
 		}
 

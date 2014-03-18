@@ -54,8 +54,6 @@ public class SensorSettingsFragment extends Fragment {
 		intent.setClass(getActivity(), BrewDroidService.class);
 		getActivity().startService(intent);
 
-		getCursor();
-
 	}
 
 	@Override
@@ -70,6 +68,9 @@ public class SensorSettingsFragment extends Fragment {
 				SOCKET_CHANNEL.SENSOR_SETTINGS.toString());
 		intent.setClass(getActivity(), BrewDroidService.class);
 		getActivity().startService(intent);
+		
+		mSensorSettingsCursorAdapter.getCursor().close();
+		mSensorSettingsCursorAdapter = null;
 	}
 
 	@Override
@@ -81,6 +82,8 @@ public class SensorSettingsFragment extends Fragment {
 		mSensorLv = (ListView) v.findViewById(R.id.sensorList);
 
 		handler = new Handler();
+		
+		getCursor();
 
 		return v;
 	}

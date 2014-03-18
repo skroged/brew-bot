@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.brew.brewdroid.OnOffIndicator.SWITCH_STATE;
 import com.brew.brewdroid.data.BrewDroidContentProvider;
 import com.brew.brewdroid.data.BrewDroidContentProvider.QueryListener;
 import com.brew.brewdroid.data.BrewDroidService;
@@ -40,11 +41,14 @@ public class BrewControlFragment extends Fragment {
 	private Handler handler;
 
 	private TextView hltTempText;
+	private TextView hltFlameText;
 	private TextView hltVolumeText;
 
 	private TextView mltTempText;
+	private TextView mltFlameText;
 
 	private TextView bkTempText;
+	private TextView bkFlameText;
 	private TextView bkVolumeText;
 
 	private TextView fermTempText;
@@ -155,12 +159,19 @@ public class BrewControlFragment extends Fragment {
 				BrewDroidService.ACTION_PING_RESULT);
 		activity.registerReceiver(mPingReceiver, pingFilter);
 
+		subscribe();
+
+	}
+
+	private void subscribe() {
+		if (getActivity() == null) {
+			return;
+		}
 		Intent intent = new Intent(BrewDroidService.ACTION_SUBSCRIBE);
 		intent.putExtra(BrewDroidService.BUNDLE_CHANNEL,
 				SOCKET_CHANNEL.BREW_CONTROL.toString());
 		intent.setClass(getActivity(), BrewDroidService.class);
 		getActivity().startService(intent);
-
 	}
 
 	@Override
@@ -207,6 +218,7 @@ public class BrewControlFragment extends Fragment {
 					}
 				}
 
+				cursor.close();
 			}
 		}
 
@@ -220,6 +232,8 @@ public class BrewControlFragment extends Fragment {
 		} else {
 			permissionText.setText("Not logged in!");
 		}
+
+		subscribe();
 	}
 
 	private void getAllSensorsCursor() {
@@ -294,7 +308,16 @@ public class BrewControlFragment extends Fragment {
 			break;
 		case BOX_TEMP:
 			boxTempText.setText(nf.format(sensor.getValue()) + " \u00B0F");
-			break;			
+			break;
+		case HLT_FLAME:
+			hltFlameText.setText(nf.format(sensor.getValue()) + " FU");
+			break;
+		case MLT_FLAME:
+			mltFlameText.setText(nf.format(sensor.getValue()) + " FU");
+			break;
+		case BK_FLAME:
+			bkFlameText.setText(nf.format(sensor.getValue()) + " FU");
+			break;
 		}
 
 	}
@@ -312,6 +335,9 @@ public class BrewControlFragment extends Fragment {
 		public void onComplete(Cursor cursor) {
 
 			if (getActivity() == null) {
+				if (cursor != null) {
+					cursor.close();
+				}
 				return;
 			}
 
@@ -408,49 +434,70 @@ public class BrewControlFragment extends Fragment {
 		switch (switchh.getName()) {
 
 		case HLT_PUMP:
-			hltPumpIndicator.setOn(switchh.getValue());
+			hltPumpIndicator
+					.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+							: SWITCH_STATE.OFF);
 			break;
 		case HLT_BURNER:
-			hltBurnerIndicator.setOn(switchh.getValue());
+			hltBurnerIndicator
+					.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+							: SWITCH_STATE.OFF);
 			break;
 		case HLT_HLT:
-			hltHltIndicator.setOn(switchh.getValue());
+			hltHltIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+					: SWITCH_STATE.OFF);
 			break;
 		case HLT_MLT:
-			hltMltIndicator.setOn(switchh.getValue());
+			hltMltIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+					: SWITCH_STATE.OFF);
 			break;
 		case MLT_PUMP:
-			mltPumpIndicator.setOn(switchh.getValue());
+			mltPumpIndicator
+					.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+							: SWITCH_STATE.OFF);
 			break;
 		case MLT_BURNER:
-			mltBurnerIndicator.setOn(switchh.getValue());
+			mltBurnerIndicator
+					.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+							: SWITCH_STATE.OFF);
 			break;
 		case MLT_MLT:
-			mltMltIndicator.setOn(switchh.getValue());
+			mltMltIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+					: SWITCH_STATE.OFF);
 			break;
 		case MLT_BK:
-			mltBkIndicator.setOn(switchh.getValue());
+			mltBkIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+					: SWITCH_STATE.OFF);
 			break;
 		case BK_PUMP:
-			bkPumpIndicator.setOn(switchh.getValue());
+			bkPumpIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+					: SWITCH_STATE.OFF);
 			break;
 		case BK_BURNER:
-			bkBurnerIndicator.setOn(switchh.getValue());
+			bkBurnerIndicator
+					.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+							: SWITCH_STATE.OFF);
 			break;
 		case BK_BK:
-			bkBkIndicator.setOn(switchh.getValue());
+			bkBkIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+					: SWITCH_STATE.OFF);
 			break;
 		case BK_FERM:
-			bkFermIndicator.setOn(switchh.getValue());
+			bkFermIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+					: SWITCH_STATE.OFF);
 			break;
 		case IGNITER:
-			igniterIndicator.setOn(switchh.getValue());
+			igniterIndicator
+					.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+							: SWITCH_STATE.OFF);
 			break;
 		case FILL:
-			fillIndicator.setOn(switchh.getValue());
+			fillIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+					: SWITCH_STATE.OFF);
 			break;
 		case CHILL:
-			chillIndicator.setOn(switchh.getValue());
+			chillIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+					: SWITCH_STATE.OFF);
 			break;
 		}
 
@@ -461,6 +508,10 @@ public class BrewControlFragment extends Fragment {
 		@Override
 		public void onClick(View v) {
 
+			if(!SocketManager.isConnected()){
+				return;
+			}
+			
 			if (v == null || v.getTag() == null) {
 				Toast.makeText(getActivity(), "Something went terribly wrong!",
 						Toast.LENGTH_SHORT).show();
@@ -468,73 +519,109 @@ public class BrewControlFragment extends Fragment {
 
 			}
 			int switchId = (Integer) v.getTag();
-			boolean isOn = false;
-			;
+
+			OnOffIndicator indicator = null;
 
 			switch (v.getId()) {
 
 			case R.id.hltPumpButton:
-				isOn = !hltPumpIndicator.isOn();
+				indicator = hltPumpIndicator;
 				break;
 
 			case R.id.hltBurnerButton:
-				isOn = !hltBurnerIndicator.isOn();
+				indicator = hltBurnerIndicator;
 				break;
 
 			case R.id.hltHltButton:
-				isOn = !hltHltIndicator.isOn();
+				indicator = hltHltIndicator;
 				break;
 
 			case R.id.hltMltButton:
-				isOn = !hltMltIndicator.isOn();
+				indicator = hltMltIndicator;
 				break;
 
 			case R.id.mltPumpButton:
-				isOn = !mltPumpIndicator.isOn();
+				indicator = mltPumpIndicator;
 				break;
 
 			case R.id.mltBurnerButton:
-				isOn = !mltBurnerIndicator.isOn();
+				indicator = mltBurnerIndicator;
 				break;
 
 			case R.id.mltMltButton:
-				isOn = !mltMltIndicator.isOn();
+				indicator = mltMltIndicator;
 				break;
 
 			case R.id.mltBkButton:
-				isOn = !mltBkIndicator.isOn();
+				indicator = mltBkIndicator;
 				break;
 
 			case R.id.bkPumpButton:
-				isOn = !bkPumpIndicator.isOn();
+				indicator = bkPumpIndicator;
 				break;
 
 			case R.id.bkBurnerButton:
-				isOn = !bkBurnerIndicator.isOn();
+				indicator = bkBurnerIndicator;
 				break;
 
 			case R.id.bkBkButton:
-				isOn = !bkBkIndicator.isOn();
+				indicator = bkBkIndicator;
 				break;
 
 			case R.id.bkFermButton:
-				isOn = !bkFermIndicator.isOn();
+				indicator = bkFermIndicator;
 				break;
 
 			case R.id.igniterButton:
-				isOn = !igniterIndicator.isOn();
+				indicator = igniterIndicator;
 				break;
 			case R.id.fillButton:
-				isOn = !fillIndicator.isOn();
+				indicator = fillIndicator;
 				break;
 			case R.id.chillButton:
-				isOn = !chillIndicator.isOn();
+				indicator = chillIndicator;
 				break;
 			}
 
+			if (indicator == null) {
+				return;
+			}
+			
+			SWITCH_STATE switchState = indicator.getSwitchState();
+
+			if (switchState == null) {
+				return;
+			}
+			
+			boolean sendState = false;
+
+			switch (switchState) {
+			case OFF:
+				switchState = SWITCH_STATE.PENDING_ON;
+				sendState = true;
+				break;
+			case ON:
+				switchState = SWITCH_STATE.PENDING_OFF;
+				sendState = false;
+				break;
+			case PENDING_OFF:
+				switchState = SWITCH_STATE.PENDING_ON;
+				sendState = true;
+				break;
+			case PENDING_ON:
+				switchState = SWITCH_STATE.PENDING_OFF;
+				sendState = false;
+				break;
+			default:
+				break;
+
+			}
+
+			indicator.setSwitchState(switchState);
+
 			Intent intent = new Intent(BrewDroidService.ACTION_SWITCH_UPDATE);
 			intent.putExtra(BrewDroidService.BUNDLE_SWITCH_ID, switchId);
-			intent.putExtra(BrewDroidService.BUNDLE_SWITCH_VALUE, isOn);
+			intent.putExtra(BrewDroidService.BUNDLE_SWITCH_VALUE, sendState);
 			intent.setClass(getActivity(), BrewDroidService.class);
 			getActivity().startService(intent);
 
@@ -552,11 +639,14 @@ public class BrewControlFragment extends Fragment {
 		pingText = (TextView) v.findViewById(R.id.pingText);
 
 		hltTempText = (TextView) v.findViewById(R.id.hltTempText);
+		hltFlameText = (TextView) v.findViewById(R.id.hltFlameText);
 		hltVolumeText = (TextView) v.findViewById(R.id.hltVolumeText);
 
 		mltTempText = (TextView) v.findViewById(R.id.mltTempText);
+		mltFlameText = (TextView) v.findViewById(R.id.mltFlameText);
 
 		bkTempText = (TextView) v.findViewById(R.id.bkTempText);
+		bkFlameText = (TextView) v.findViewById(R.id.bkFlameText);
 		bkVolumeText = (TextView) v.findViewById(R.id.bkVolumeText);
 
 		fermTempText = (TextView) v.findViewById(R.id.fermTempText);

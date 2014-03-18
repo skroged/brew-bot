@@ -160,7 +160,7 @@ public class SensorSettingsView extends RelativeLayout {
 
 		}
 
-	}; 
+	};
 
 	public void setSensorSettingsViewListener(
 			SensorSettingsViewListener sensorSettingsViewListener) {
@@ -186,9 +186,6 @@ public class SensorSettingsView extends RelativeLayout {
 		// addressText.setText(sensor.getAddress());
 		// }
 
-		if (sensor.getSensorName() == SENSOR_NAME.HLT_TEMP) {
-			Log.i("JOSH", "address: " + sensor.getAddress());
-		}
 		inLowText.setText(sensor.getCalibration().getInputLow() + "");
 		outLowText.setText(sensor.getCalibration().getOutputLow() + "");
 		inHighText.setText(sensor.getCalibration().getInputHigh() + "");

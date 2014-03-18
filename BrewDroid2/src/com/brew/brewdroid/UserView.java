@@ -72,8 +72,7 @@ public class UserView extends RelativeLayout {
 					UserChannelPermission ucp = DataObjectTranslator
 							.getPermissionFromCursor(cursor);
 					if (mUser.getId() != ucp.getUserId()) {
-						Log.i("JOSH", "user changed: " + mUser.getId() + ", "
-								+ ucp.getUserId());
+						cursor.close();
 						return;
 					}
 					permissions.add(ucp);

@@ -267,6 +267,11 @@ public class SocketConnection {
 
 			if (channelPermission == CHANNEL_PERMISSION.NONE) {
 
+				if (user == null) {
+					Logger.log("SOCKET", "no user for socket on channel "
+							+ subscribeChannel);
+					return;
+				}
 				Logger.log("SOCKET",
 						"no permission for user " + user.getUsername()
 								+ " on channel " + subscribeChannel);
@@ -278,6 +283,8 @@ public class SocketConnection {
 					+ " subscribed to channel " + subscribeChannel
 					+ " with permission " + channelPermission);
 
+			// remove first to prevent duplicates
+			SocketChannel.get(subscribeChannel).removeSocketConnection(this);
 			SocketChannel.get(subscribeChannel).addSocketConnection(this);
 
 			switch (subscribeChannel) {
