@@ -20,7 +20,7 @@
                 android:id="@+id/fermLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
+                android:layout_marginRight="25dp"
                 android:orientation="vertical" >
 
                 <TextView
@@ -29,7 +29,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="Ferm"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -38,7 +38,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="110°"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -47,7 +47,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text=""
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -56,7 +56,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text=""
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -66,17 +66,18 @@
 
                     <RelativeLayout
                         android:id="@+id/airButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginRight="8dp"
                         android:layout_marginTop="5dp"
                         android:padding="3dp" >
 
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/aurIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_centerHorizontal="true" />
 
                         <TextView
@@ -86,14 +87,14 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="AIR"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
 
                     <RelativeLayout
                         android:id="@+id/igniterButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="5dp"
@@ -102,7 +103,7 @@
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/igniterIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_centerHorizontal="true" />
 
                         <TextView
@@ -112,7 +113,7 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="IGNITE"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
                 </LinearLayout>
@@ -124,17 +125,18 @@
 
                     <RelativeLayout
                         android:id="@+id/fillButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginRight="8dp"
                         android:layout_marginTop="5dp"
                         android:padding="3dp" >
 
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/fillIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_centerHorizontal="true" />
 
                         <TextView
@@ -144,14 +146,14 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="FILL"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
 
                     <RelativeLayout
                         android:id="@+id/chillButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="5dp"
@@ -160,7 +162,7 @@
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/chillIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_centerHorizontal="true" />
 
                         <TextView
@@ -170,7 +172,7 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="CHILL"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
                 </LinearLayout>
@@ -180,8 +182,8 @@
                 android:id="@+id/bkLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
                 android:layout_toRightOf="@+id/fermLayout"
                 android:orientation="vertical" >
 
@@ -191,7 +193,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="BK"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -200,7 +202,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="110°"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -209,7 +211,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="130 FU"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -218,7 +220,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="3.5 Gal"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -228,17 +230,18 @@
 
                     <RelativeLayout
                         android:id="@+id/bkBurnerButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginRight="8dp"
                         android:layout_marginTop="5dp"
                         android:padding="3dp" >
 
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/bkBurnerIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -249,14 +252,14 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="BURNER"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
 
                     <RelativeLayout
                         android:id="@+id/bkPumpButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="5dp"
@@ -265,7 +268,7 @@
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/bkPumpIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -276,7 +279,7 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="PUMP"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
                 </LinearLayout>
@@ -288,17 +291,18 @@
 
                     <RelativeLayout
                         android:id="@+id/bkFermButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginRight="8dp"
                         android:layout_marginTop="5dp"
                         android:padding="3dp" >
 
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/bkFermIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -309,14 +313,14 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="X-FER"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
 
                     <RelativeLayout
                         android:id="@+id/bkBkButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="5dp"
@@ -325,7 +329,7 @@
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/bkBkIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -336,7 +340,7 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="RECIRC"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
                 </LinearLayout>
@@ -347,8 +351,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@+id/bkLayout"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
                 android:layout_toRightOf="@+id/bkLayout"
                 android:orientation="vertical" >
 
@@ -358,7 +362,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="MLT"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -367,7 +371,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="110°"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -376,7 +380,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="130 FU"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -385,7 +389,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text=""
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -395,17 +399,18 @@
 
                     <RelativeLayout
                         android:id="@+id/mltBurnerButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginRight="8dp"
                         android:layout_marginTop="5dp"
                         android:padding="3dp" >
 
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/mltBurnerIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -416,14 +421,14 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="BURNER"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
 
                     <RelativeLayout
                         android:id="@+id/mltPumpButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="5dp"
@@ -432,7 +437,7 @@
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/mltPumpIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -443,7 +448,7 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="PUMP"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
                 </LinearLayout>
@@ -455,17 +460,18 @@
 
                     <RelativeLayout
                         android:id="@+id/mltBkButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginRight="8dp"
                         android:layout_marginTop="5dp"
                         android:padding="3dp" >
 
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/mltBkIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -476,14 +482,14 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="X-FER"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
 
                     <RelativeLayout
                         android:id="@+id/mltMltButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="5dp"
@@ -492,7 +498,7 @@
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/mltMltIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -503,7 +509,7 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="RECIRC"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
                 </LinearLayout>
@@ -514,7 +520,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@+id/mltLayout"
-                android:layout_marginLeft="15dp"
+                android:layout_marginLeft="25dp"
                 android:layout_toRightOf="@+id/mltLayout"
                 android:orientation="vertical" >
 
@@ -524,7 +530,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="HLT"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -533,7 +539,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="110°"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -542,7 +548,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="130 FU"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -551,7 +557,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="3.5 Gal"
-                    android:textSize="10dp"
+                    android:textSize="16dp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -561,17 +567,18 @@
 
                     <RelativeLayout
                         android:id="@+id/hltBurnerButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginRight="8dp"
                         android:layout_marginTop="5dp"
                         android:padding="3dp" >
 
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/hltBurnerIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -582,14 +589,14 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="BURNER"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
 
                     <RelativeLayout
                         android:id="@+id/hltPumpButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="5dp"
@@ -598,7 +605,7 @@
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/hltPumpIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -609,7 +616,7 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="PUMP"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
                 </LinearLayout>
@@ -621,17 +628,18 @@
 
                     <RelativeLayout
                         android:id="@+id/hltMltButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginRight="8dp"
                         android:layout_marginTop="5dp"
                         android:padding="3dp" >
 
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/hltMltIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -642,14 +650,14 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="X-FER"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
 
                     <RelativeLayout
                         android:id="@+id/hltHltButton"
-                        android:layout_width="40dp"
-                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:layout_height="160dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="5dp"
                         android:layout_marginTop="5dp"
@@ -658,7 +666,7 @@
                         <com.brew.brewdroid.OnOffIndicator
                             android:id="@+id/hltHltIndicator"
                             android:layout_width="fill_parent"
-                            android:layout_height="60dp"
+                            android:layout_height="120dp"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true" />
 
@@ -669,7 +677,7 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:text="RECIRC"
-                            android:textSize="8dp"
+                            android:textSize="16dp"
                             android:textStyle="bold" />
                     </RelativeLayout>
                 </LinearLayout>
@@ -683,7 +691,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:text="Connected"
-        android:textSize="10dp"
+        android:textSize="16dp"
         android:textStyle="bold" />
 
     <TextView
@@ -693,7 +701,7 @@
         android:layout_margin="10dp"
         android:layout_toRightOf="@+id/connectedText"
         android:text="Permission:"
-        android:textSize="10dp"
+        android:textSize="16dp"
         android:textStyle="bold" />
 
     <TextView
@@ -704,7 +712,7 @@
         android:layout_alignParentTop="true"
         android:layout_margin="10dp"
         android:text="Ping: 30ms"
-        android:textSize="10dp"
+        android:textSize="16dp"
         android:textStyle="bold" />
 
     <TextView
@@ -715,7 +723,7 @@
         android:layout_below="@+id/pingText"
         android:layout_marginRight="10dp"
         android:text="110°"
-        android:textSize="10dp"
+        android:textSize="16dp"
         android:textStyle="bold" />
 
     <ProgressBar

@@ -91,7 +91,7 @@ public class DataObjectTranslator {
 		values.put(DbOpenHelper.SENSORS_ID, sensor.getSensorId());
 		values.put(DbOpenHelper.SENSORS_VALUE, sensor.getCalibratedValue());
 		values.put(DbOpenHelper.SENSORS_VALUE, sensor.getValue());
-		values.put(DbOpenHelper.SENSORS_ADDRESS, sensor.getAddress());		
+		values.put(DbOpenHelper.SENSORS_ADDRESS, sensor.getAddress());
 		values.put(DbOpenHelper.SENSORS_VALUE_CALIBRATED,
 				sensor.getCalibratedValue());
 		values.put(DbOpenHelper.SENSORS_CALIBRATION_INPUT_LOW,

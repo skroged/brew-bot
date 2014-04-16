@@ -12,6 +12,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -73,6 +74,7 @@ public class BrewControlFragment extends Fragment {
 	private View igniterButton;
 	private View fillButton;
 	private View chillButton;
+	private View airButton;
 
 	private OnOffIndicator bkPumpIndicator;
 	private OnOffIndicator bkBurnerIndicator;
@@ -92,10 +94,14 @@ public class BrewControlFragment extends Fragment {
 	private OnOffIndicator igniterIndicator;
 	private OnOffIndicator fillIndicator;
 	private OnOffIndicator chillIndicator;
+	private OnOffIndicator airIndicator;
 
 	private TextView connectedText;
 	private TextView permissionText;
 	private TextView pingText;
+
+	private MediaPlayer mMediaPlayerSwitchOn;
+	private MediaPlayer mMediaPlayerSwitchOff;
 
 	public static BrewControlFragment instantiate() {
 		BrewControlFragment frag = new BrewControlFragment();
@@ -143,6 +149,10 @@ public class BrewControlFragment extends Fragment {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 
+		mMediaPlayerSwitchOn = MediaPlayer.create(activity, R.raw.switch1);
+		mMediaPlayerSwitchOff = MediaPlayer.create(activity, R.raw.switch2);
+		mMediaPlayerSwitchOff.setVolume(.5f, .5f);
+
 		BrewDroidContentProvider.registerSensorsContentObserver(getActivity(),
 				sensorObserver);
 		BrewDroidContentProvider.registerSwitchesContentObserver(activity,
@@ -176,6 +186,14 @@ public class BrewControlFragment extends Fragment {
 
 	@Override
 	public void onDetach() {
+
+		if (mMediaPlayerSwitchOn != null) {
+			mMediaPlayerSwitchOn.release();
+		}
+
+		if (mMediaPlayerSwitchOff != null) {
+			mMediaPlayerSwitchOff.release();
+		}
 
 		Intent intent = new Intent(BrewDroidService.ACTION_UNSUBSCRIBE);
 		intent.putExtra(BrewDroidService.BUNDLE_CHANNEL,
@@ -411,6 +429,9 @@ public class BrewControlFragment extends Fragment {
 		case CHILL:
 			chillButton.setTag(switchh.getId());
 			break;
+		case AIR:
+			airButton.setTag(switchh.getId());
+			break;
 		case MLT_BK:
 			mltBkButton.setTag(switchh.getId());
 			break;
@@ -499,7 +520,21 @@ public class BrewControlFragment extends Fragment {
 			chillIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
 					: SWITCH_STATE.OFF);
 			break;
+		case AIR:
+			airIndicator.setSwitchState(switchh.getValue() ? SWITCH_STATE.ON
+					: SWITCH_STATE.OFF);
+			break;
 		}
+		
+		// MediaPlayer mediaPlayer = null;
+		//
+		// mediaPlayer = switchh.getValue() ? mMediaPlayerSwitchOn
+		// : mMediaPlayerSwitchOff;
+		//
+		// if (mediaPlayer != null) {
+		// mediaPlayer.seekTo(0);
+		// mediaPlayer.start();
+		// }
 
 	}
 
@@ -508,10 +543,10 @@ public class BrewControlFragment extends Fragment {
 		@Override
 		public void onClick(View v) {
 
-			if(!SocketManager.isConnected()){
+			if (false && !SocketManager.isConnected()) {
 				return;
 			}
-			
+
 			if (v == null || v.getTag() == null) {
 				Toast.makeText(getActivity(), "Something went terribly wrong!",
 						Toast.LENGTH_SHORT).show();
@@ -581,18 +616,21 @@ public class BrewControlFragment extends Fragment {
 			case R.id.chillButton:
 				indicator = chillIndicator;
 				break;
+			case R.id.airButton:
+				indicator = airIndicator;
+				break;
 			}
 
 			if (indicator == null) {
 				return;
 			}
-			
+
 			SWITCH_STATE switchState = indicator.getSwitchState();
 
 			if (switchState == null) {
 				return;
 			}
-			
+
 			boolean sendState = false;
 
 			switch (switchState) {
@@ -616,6 +654,17 @@ public class BrewControlFragment extends Fragment {
 				break;
 
 			}
+
+			 MediaPlayer mediaPlayer = null;
+			
+			 mediaPlayer = (switchState == SWITCH_STATE.ON || switchState ==
+			 SWITCH_STATE.PENDING_OFF) ? mMediaPlayerSwitchOff
+			 : mMediaPlayerSwitchOn;
+			
+			 if (mediaPlayer != null) {
+			 mediaPlayer.seekTo(0);
+			 mediaPlayer.start();
+			 }
 
 			indicator.setSwitchState(switchState);
 
@@ -671,6 +720,7 @@ public class BrewControlFragment extends Fragment {
 		igniterButton = v.findViewById(R.id.igniterButton);
 		fillButton = v.findViewById(R.id.fillButton);
 		chillButton = v.findViewById(R.id.chillButton);
+		airButton = v.findViewById(R.id.airButton);
 
 		hltPumpIndicator = (OnOffIndicator) v
 				.findViewById(R.id.hltPumpIndicator);
@@ -696,6 +746,27 @@ public class BrewControlFragment extends Fragment {
 				.findViewById(R.id.igniterIndicator);
 		fillIndicator = (OnOffIndicator) v.findViewById(R.id.fillIndicator);
 		chillIndicator = (OnOffIndicator) v.findViewById(R.id.chillIndicator);
+		airIndicator = (OnOffIndicator) v.findViewById(R.id.airIndicator);
+
+		hltPumpButton.setSoundEffectsEnabled(false);
+		hltBurnerButton.setSoundEffectsEnabled(false);
+		hltHltButton.setSoundEffectsEnabled(false);
+		hltMltButton.setSoundEffectsEnabled(false);
+
+		mltPumpButton.setSoundEffectsEnabled(false);
+		mltBurnerButton.setSoundEffectsEnabled(false);
+		mltMltButton.setSoundEffectsEnabled(false);
+		mltBkButton.setSoundEffectsEnabled(false);
+
+		bkPumpButton.setSoundEffectsEnabled(false);
+		bkBurnerButton.setSoundEffectsEnabled(false);
+		bkBkButton.setSoundEffectsEnabled(false);
+		bkFermButton.setSoundEffectsEnabled(false);
+
+		igniterButton.setSoundEffectsEnabled(false);
+		fillButton.setSoundEffectsEnabled(false);
+		chillButton.setSoundEffectsEnabled(false);
+		airButton.setSoundEffectsEnabled(false);
 
 		hltPumpButton.setOnClickListener(switchClick);
 		hltBurnerButton.setOnClickListener(switchClick);
@@ -715,6 +786,7 @@ public class BrewControlFragment extends Fragment {
 		igniterButton.setOnClickListener(switchClick);
 		fillButton.setOnClickListener(switchClick);
 		chillButton.setOnClickListener(switchClick);
+		airButton.setOnClickListener(switchClick);
 
 		v.findViewById(R.id.progressBar1).setVisibility(View.GONE);
 
