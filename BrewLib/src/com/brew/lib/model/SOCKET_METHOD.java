@@ -4,11 +4,11 @@ public enum SOCKET_METHOD {
 	DATA_UPDATE("update"), SENSOR_SETTINGS_UPDATE("sensorSettingsUpdate"), CONFIRM_MESSAGE(
 			"confirm"), SWITCH_UPDATE("switch"), PING("ping"), SUBSCRIBE(
 			"subscribe"), SUBSCRIBE_RESULT("subscribeResult"), UNSUBSCRIBE(
-			"unsubscribe"), REGISTER_USER("register"), LOGIN_USER("login"), REGISTER_RESULT(
-			"registerResult"), LOGIN_RESULT("loginResult"), LOG("log"), UPDATE_USERS(
-			"updateUsers"), REQUEST_SERVER_INFO("requestServerInfo"), SEND_SERVER_INFO(
-			"sendServerInfo"), REQUEST_ANDROID_APK("requestApk"), SEND_ANDROID_APK(
-			"sendApk");
+			"unsubscribe"), REGISTER_USER("register"), LOGIN_USER("login"), LOGOUT_USER(
+			"logout"), REGISTER_RESULT("registerResult"), LOGIN_RESULT(
+			"loginResult"), LOG("log"), UPDATE_USERS("updateUsers"), REQUEST_SERVER_INFO(
+			"requestServerInfo"), SEND_SERVER_INFO("sendServerInfo"), REQUEST_ANDROID_APK(
+			"requestApk"), SEND_ANDROID_APK("sendApk");
 
 	String SERVER_STR;
 

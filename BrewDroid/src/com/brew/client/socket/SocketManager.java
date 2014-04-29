@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.util.Log;
 
+import com.brew.client.data.BrewDroidContentProvider;
 import com.brew.lib.model.ApkPacket;
 import com.brew.lib.model.BrewData;
 import com.brew.lib.model.BrewMessage;
@@ -26,7 +27,9 @@ import com.brew.lib.model.GsonHelper;
 import com.brew.lib.model.LogMessage;
 import com.brew.lib.model.SOCKET_CHANNEL;
 import com.brew.lib.model.SOCKET_METHOD;
+import com.brew.lib.model.SensorTransport;
 import com.brew.lib.model.ServerInfo;
+import com.brew.lib.model.SwitchTransport;
 import com.brew.lib.model.User;
 import com.example.brewdroid.BrewDroidUtil;
 import com.google.gson.reflect.TypeToken;
@@ -380,6 +383,17 @@ public class SocketManager {
 
 			case DATA_UPDATE:
 
+				if(message.getData().getSensors() != null){
+					
+					for (SensorTransport st : message.getData().getSensors()) {
+						
+						BrewDroidContentProvider.updateSensor(null, context, st);
+						
+					}
+					
+					
+				}
+				
 				synchronized (socketManagerListeners) {
 
 					for (SocketManagerListener listener : socketManagerListeners) {

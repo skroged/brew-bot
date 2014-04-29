@@ -231,6 +231,7 @@ public class MySqlManager {
 					userChannelPermission.setChannel(channel);
 					userChannelPermission.setPermission(permission);
 					userChannelPermission.setId(id);
+					userChannelPermission.setUserId(userId);
 
 					permissions.add(userChannelPermission);
 

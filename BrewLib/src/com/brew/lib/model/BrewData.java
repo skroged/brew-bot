@@ -5,25 +5,19 @@ import java.util.List;
 public class BrewData {
 
 	private List<SensorSettingsTransport> sensorSettings;
-	private List<SensorTransport> sensors;
-	private List<SwitchTransport> switches;
+	private List<SensorTransport> sensorTransports;
+	private List<Sensor> sensors;
+	private List<SwitchTransport> switchTransports;
+	private List<Switch> switches;
 	private List<User> users;
 	private List<String> oneWireAddresses;
 
-	public List<SensorTransport> getSensors() {
-		return sensors;
+	public List<SensorTransport> getSensorTransports() {
+		return sensorTransports;
 	}
 
-	public void setSensors(List<SensorTransport> sensors) {
-		this.sensors = sensors;
-	}
-
-	public List<SwitchTransport> getSwitches() {
-		return switches;
-	}
-
-	public void setSwitches(List<SwitchTransport> switches) {
-		this.switches = switches;
+	public void setSensorTransports(List<SensorTransport> sensorTransports) {
+		this.sensorTransports = sensorTransports;
 	}
 
 	public List<User> getUsers() {
@@ -48,6 +42,30 @@ public class BrewData {
 
 	public void setOneWireAddresses(List<String> oneWireAddresses) {
 		this.oneWireAddresses = oneWireAddresses;
+	}
+
+	public List<Sensor> getSensors() {
+		return sensors;
+	}
+
+	public void setSensors(List<Sensor> sensors) {
+		this.sensors = sensors;
+	}
+
+	public List<SwitchTransport> getSwitchTransports() {
+		return switchTransports;
+	}
+
+	public void setSwitchTransports(List<SwitchTransport> switchTransports) {
+		this.switchTransports = switchTransports;
+	}
+
+	public List<Switch> getSwitches() {
+		return switches;
+	}
+
+	public void setSwitches(List<Switch> switches) {
+		this.switches = switches;
 	}
 
 }

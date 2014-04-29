@@ -17,7 +17,6 @@ public class Sensor {
 			SensorSettingsTransport transport, boolean applyValue) {
 
 		address = transport.getAddress();
-		sensorName = transport.getSensorName();
 		calibration = new SensorCalibration();
 		calibration.setInputHigh(transport.getInputHigh());
 		calibration.setInputLow(transport.getInputLow());
@@ -25,7 +24,7 @@ public class Sensor {
 		calibration.setOutputLow(transport.getOutputLow());
 
 		calibration.resetEquation();
-		
+
 		if (applyValue) {
 			value = transport.getValue();
 			calibratedValue = transport.getCalibratedValue();
@@ -50,11 +49,11 @@ public class Sensor {
 		SensorTransport sensorTransport = new SensorTransport();
 
 		sensorTransport.setValue(getCalibratedValue());
-		sensorTransport.setSensorName(getSensorName());
+		sensorTransport.setSensorId(getSensorId());
 
 		sensors.add(sensorTransport);
 
-		data.setSensors(sensors);
+		data.setSensorTransports(sensors);
 
 		message.setData(data);
 
@@ -81,6 +80,10 @@ public class Sensor {
 		message.setData(data);
 
 		return message;
+	}
+
+	public void setCalibratedValue(float calibratedValue) {
+		this.calibratedValue = calibratedValue;
 	}
 
 	public float getValue() {

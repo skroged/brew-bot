@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="6dp" >
+
+    <TextView
+        android:id="@+id/nameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="TextView"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/rawValueLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/nameText"
+        android:text="Raw: "
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/rawValueText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/nameText"
+        android:layout_toRightOf="@+id/rawValueLabel"
+        android:text="1045"
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/calibratedValueLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rawValueLabel"
+        android:text="Calibrated: "
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/calibratedValueText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rawValueLabel"
+        android:layout_toRightOf="@+id/calibratedValueLabel"
+        android:text="104.5"
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/inLowLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/inLowText"
+        android:text="Input 1: "
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/inLowText"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/calibratedValueLabel"
+        android:layout_toRightOf="@+id/inLowLabel"
+        android:text="12304"
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/outLowLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/outLowText"
+        android:layout_marginLeft="3dp"
+        android:layout_toRightOf="@+id/inLowText"
+        android:text="Output 1: "
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/outLowText"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/calibratedValueLabel"
+        android:layout_toRightOf="@+id/outLowLabel"
+        android:text="15.54"
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/editLowButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/calibratedValueText"
+        android:layout_toRightOf="@+id/outLowText"
+        android:text="Edit"
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/inHighLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/inHighText"
+        android:text="Input 2: "
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/inHighText"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editLowButton"
+        android:layout_toRightOf="@+id/inHighLabel"
+        android:text="123"
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/outHighLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/outHighText"
+        android:layout_marginLeft="3dp"
+        android:layout_toRightOf="@+id/inHighText"
+        android:text="Output 2: "
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/outHighText"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/outLowText"
+        android:layout_toRightOf="@+id/outHighLabel"
+        android:text="12.45"
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/editHighButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editLowButton"
+        android:layout_toRightOf="@+id/outHighText"
+        android:text="Edit"
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/addressLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/addressText"
+        android:text="Address: "
+        android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/addressText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editHighButton"
+        android:layout_toRightOf="@+id/addressLabel"
+        android:text="28-00000474d694"
+        android:textSize="10dp" />
+    
+    <TextView
+        android:id="@+id/editAddressButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editHighButton"
+        android:layout_toRightOf="@+id/outHighText"
+        android:text="Edit"
+        android:textSize="10dp" />
+
+</RelativeLayout>

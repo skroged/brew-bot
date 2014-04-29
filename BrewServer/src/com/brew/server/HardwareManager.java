@@ -38,7 +38,7 @@ public class HardwareManager {
 	public static final String ONE_WIRE_PATH_START = "/sys/bus/w1/devices/";
 	public static final String ONE_WIRE_PATH_END = "/w1_slave";
 	private static List<Sensor> sensors;
-	private static Map<SWITCH_NAME, Switch> switches;
+	private static Map<Integer, Switch> switches;
 
 	public static void init() {
 
@@ -69,11 +69,13 @@ public class HardwareManager {
 	}
 
 	private static void initSwitches() {
-		switches = new Hashtable<SWITCH_NAME, Switch>();
+		switches = new Hashtable<Integer, Switch>();
 
 		for (SWITCH_NAME sn : SWITCH_NAME.values()) {
 			Switch switchh = MySqlManager.getSwitch(sn);
-			switches.put(switchh.getName(), switchh);
+			if (switchh != null) {
+				switches.put(switchh.getId(), switchh);
+			}
 		}
 
 		// Switch hltPump = new Switch();
@@ -144,7 +146,7 @@ public class HardwareManager {
 
 						for (Sensor sensor : sensors) {
 
-							if (sensor.getSensorName() == sst.getSensorName()) {
+							if (sensor.getSensorId() == sst.getSensorId()) {
 
 								Logger.log("SETTINGS", "new settings for "
 										+ sensor.getSensorName());
@@ -172,16 +174,17 @@ public class HardwareManager {
 
 			if (message.getData() != null) {
 
-				if (message.getData().getSwitches() != null) {
+				if (message.getData().getSwitchTransports() != null) {
 
-					for (SwitchTransport sw : message.getData().getSwitches()) {
+					for (SwitchTransport sw : message.getData()
+							.getSwitchTransports()) {
 
-						Switch switchh = switches.get(sw.getSwitchName());
+						Switch switchh = switches.get(sw.getSwitchId());
 						if (switchh != null) {
 							updateSwitchValue(switchh, sw.getSwitchValue());
 						} else {
-							System.out.println("no value for "
-									+ sw.getSwitchName());
+							// System.out.println("no value for "
+							// + sw.getSwitchName());
 						}
 
 					}
@@ -209,11 +212,11 @@ public class HardwareManager {
 			SwitchTransport switchTransport = new SwitchTransport();
 
 			switchTransport.setSwitchValue(switchh.getValue());
-			switchTransport.setSwitchName(switchh.getName());
+			switchTransport.setSwitchId(switchh.getId());
 
 			switches.add(switchTransport);
 
-			data.setSwitches(switches);
+			data.setSwitchTransports(switches);
 
 			message.setData(data);
 
@@ -243,6 +246,66 @@ public class HardwareManager {
 
 	};
 
+	public static class DataDumpThread extends Thread {
+
+		private boolean kilt;
+
+		@Override
+		public synchronized void start() {
+			super.start();
+		}
+
+		@Override
+		public void run() {
+
+			while (!kilt) {
+
+				BrewMessage message = new BrewMessage();
+
+				message.setMethod(SOCKET_METHOD.DATA_UPDATE);
+
+				BrewData data = new BrewData();
+
+				List<SensorTransport> sensorTransports = new ArrayList<SensorTransport>();
+
+				data.setSensors(sensors);
+
+				List<Switch> switchList = new ArrayList<Switch>();
+				Iterator<?> it = switches.entrySet().iterator();
+				while (it.hasNext()) {
+
+					Map.Entry<?, ?> pairs = (Map.Entry<?, ?>) it.next();
+
+					Switch switchh = (Switch) pairs.getValue();
+
+					switchList.add(switchh);
+
+				}
+
+				data.setSwitches(switchList);
+
+				message.setData(data);
+
+				SocketChannel.get(SOCKET_CHANNEL.BREW_CONTROL).sendBroadcast(
+						message);
+
+				SocketChannel.get(SOCKET_CHANNEL.SENSOR_SETTINGS)
+						.sendBroadcast(message);
+
+				try {
+					Thread.sleep(1000 * 3);
+				} catch (InterruptedException e) {
+					kilt = true;
+					e.printStackTrace();
+				}
+			}
+		}
+
+		public void kill() {
+			kilt = true;
+		}
+	}
+
 	public static void requestDataDump(final SocketConnection socket) {
 
 		new Thread() {
@@ -258,36 +321,39 @@ public class HardwareManager {
 
 				List<SensorTransport> sensorTransports = new ArrayList<SensorTransport>();
 
-				for (Sensor sensor : sensors) {
+				// for (Sensor sensor : sensors) {
+				//
+				// SensorTransport sensorTransport = new SensorTransport();
+				//
+				// sensorTransport.setValue(sensor.getCalibratedValue());
+				// sensorTransport.setSensorId(sensor.getSensorId());
+				//
+				// sensorTransports.add(sensorTransport);
+				// }
 
-					SensorTransport sensorTransport = new SensorTransport();
+				data.setSensors(sensors);
 
-					sensorTransport.setValue(sensor.getCalibratedValue());
-					sensorTransport.setSensorName(sensor.getSensorName());
-
-					sensorTransports.add(sensorTransport);
-				}
-
-				data.setSensors(sensorTransports);
-
-				List<SwitchTransport> switchTransports = new ArrayList<SwitchTransport>();
+				// List<SwitchTransport> switchTransports = new
+				// ArrayList<SwitchTransport>();
+				List<Switch> switchList = new ArrayList<Switch>();
 				Iterator<?> it = switches.entrySet().iterator();
 				while (it.hasNext()) {
 
-					SwitchTransport switchTransport = new SwitchTransport();
+					// SwitchTransport switchTransport = new SwitchTransport();
 
 					Map.Entry<?, ?> pairs = (Map.Entry<?, ?>) it.next();
 
 					Switch switchh = (Switch) pairs.getValue();
 
-					switchTransport.setSwitchValue(switchh.getValue());
-					switchTransport.setSwitchName(switchh.getName());
+					switchList.add(switchh);
+					// switchTransport.setSwitchValue(switchh.getValue());
+					// switchTransport.setSwitchName(switchh.getName());
 
-					switchTransports.add(switchTransport);
+					// switchTransports.add(switchTransport);
 
 				}
 
-				data.setSwitches(switchTransports);
+				data.setSwitches(switchList);
 
 				message.setData(data);
 
@@ -348,7 +414,7 @@ public class HardwareManager {
 		return sensors;
 	}
 
-	public static Map<SWITCH_NAME, Switch> getSwitches() {
+	public static Map<Integer, Switch> getSwitches() {
 		return switches;
 	}
 
@@ -369,7 +435,8 @@ public class HardwareManager {
 
 				kilt = false;
 
-				Process proc = Runtime.getRuntime().exec("sudo ./Spi_Pressure");
+				Process proc = Runtime.getRuntime().exec(
+						"/home/pi/BrewServer/Spi_Pressure");
 
 				BufferedReader stdInput = new BufferedReader(
 						new InputStreamReader(proc.getInputStream()));
@@ -383,8 +450,8 @@ public class HardwareManager {
 				}
 
 				// read any errors from the attempted command
-				System.out
-						.println("Here is the standard error of the command (if any):\n");
+				// System.out
+				// .println("Here is the standard error of the command (if any):\n");
 				while (!kilt && (s = stdError.readLine()) != null) {
 					System.out.println(s);
 				}
@@ -393,6 +460,135 @@ public class HardwareManager {
 
 				stdInput.close();
 				stdError.close();
+
+				Logger.log("SYSTEM", "SPI ended");
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		public void kill() {
+			kilt = true;
+		}
+	}
+
+	// public static class UpdateADCSensorsThread extends Thread {
+	//
+	// private boolean kilt;
+	//
+	// @Override
+	// public synchronized void start() {
+	// super.start();
+	// }
+	//
+	// @Override
+	// public void run() {
+	// try {
+	//
+	// Logger.log("SYSTEM", "Starting ADC");
+	//
+	// kilt = false;
+	//
+	// Process proc = Runtime.getRuntime().exec(
+	// "sudo python /home/pi/BrewServer/I2C/ADC.py");
+	//
+	// BufferedReader stdInput = new BufferedReader(
+	// new InputStreamReader(proc.getInputStream()));
+	//
+	// BufferedReader stdError = new BufferedReader(
+	// new InputStreamReader(proc.getErrorStream()));
+	//
+	//
+	// String s;
+	// while (!kilt && (s = stdInput.readLine()) != null) {
+	// System.out.println("read: " + s);
+	// // updateADCSensorValues(s);
+	// }
+	//
+	// // read any errors from the attempted command
+	// // System.out
+	// // .println("Here is the standard error of the command (if any):\n");
+	// while (!kilt && (s = stdError.readLine()) != null) {
+	// System.out.println(s);
+	// }
+	//
+	// proc.destroy();
+	//
+	// stdInput.close();
+	// stdError.close();
+	//
+	// Logger.log("SYSTEM", "ADC ended");
+	//
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// }
+	// }
+	//
+	// public void kill() {
+	// kilt = true;
+	// }
+	// }
+
+	public static class UpdateADCSensorsThread extends Thread {
+
+		private boolean kilt;
+
+		@Override
+		public synchronized void start() {
+			super.start();
+		}
+
+		@Override
+		public void run() {
+			try {
+
+				Logger.log("SYSTEM", "Starting ADC");
+
+				kilt = false;
+
+				while (!kilt) {
+					Process proc = Runtime.getRuntime().exec(
+							"/usr/bin/python /home/pi/BrewServer/I2C/ADC.py");
+
+					BufferedReader stdInput = new BufferedReader(
+							new InputStreamReader(proc.getInputStream()));
+
+					BufferedReader stdError = new BufferedReader(
+							new InputStreamReader(proc.getErrorStream()));
+
+					String s;
+					long minTime = 200;
+					while (!kilt && (s = stdInput.readLine()) != null) {
+						// System.out.println("read: " + s);
+						long before = System.currentTimeMillis();
+						updateADCSensorValues(s);
+						long after = System.currentTimeMillis();
+						long elapsed = after - before;
+						if (elapsed < minTime) {
+							long sleep = minTime - elapsed;
+							try {
+								Thread.sleep(sleep);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+
+					}
+
+					// read any errors from the attempted command
+					// System.out
+					// .println("Here is the standard error of the command (if any):\n");
+					while (!kilt && (s = stdError.readLine()) != null) {
+						System.out.println(s);
+					}
+
+					proc.destroy();
+
+					stdInput.close();
+					stdError.close();
+				}
+				Logger.log("SYSTEM", "ADC ended");
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -437,6 +633,10 @@ public class HardwareManager {
 
 							float value = readOneWireSensorValue(address);
 
+							if (value < 3 || value > 110000) {
+								continue;
+							}
+
 							boolean changed = Math.abs(sensor.getValue()
 									- value) > 0;
 
@@ -467,13 +667,15 @@ public class HardwareManager {
 
 	private static UpdateOneWireThread updateOneWireThread;
 	private static UpdateSPIThread updateSPIThread;
+	private static UpdateADCSensorsThread updateADCSensorsThread;
+	private static DataDumpThread dataDumpThread;
 
 	public static void startUpdating() {
 
 		try {
-			Process p1 = Runtime.getRuntime().exec("sudo modprobe w1-gpio");
+			Process p1 = Runtime.getRuntime().exec("/sbin/modprobe w1-gpio");
 			p1.waitFor();
-			Process p2 = Runtime.getRuntime().exec("sudo modprobe w1-therm");
+			Process p2 = Runtime.getRuntime().exec("/sbin/modprobe w1-therm");
 			p2.waitFor();
 		} catch (IOException e) {
 			Logger.log("SYSTEM", "failed to enable one-wire");
@@ -489,6 +691,14 @@ public class HardwareManager {
 
 		updateSPIThread = new UpdateSPIThread();
 		updateSPIThread.start();
+
+		updateADCSensorsThread = new UpdateADCSensorsThread();
+		updateADCSensorsThread.start();
+
+		dataDumpThread = new DataDumpThread();
+		dataDumpThread.start();
+
+		setSwitchHardware();
 	}
 
 	public static void stopUddating() throws InterruptedException {
@@ -499,6 +709,7 @@ public class HardwareManager {
 
 			updateOneWireThread.join(1000);
 			updateSPIThread.join(1000);
+			updateADCSensorsThread.join(1000);
 		} catch (InterruptedException e) {
 			System.err.println(e.getMessage());
 			throw e;
@@ -557,7 +768,7 @@ public class HardwareManager {
 
 				}
 
-			//	System.out.println("bits: " + bits);
+				// System.out.println("bits: " + bits);
 
 				byte lowByte = (byte) (bits & 0xff);
 				byte hiByte = (byte) ((bits & 0xff00) >> 8);
@@ -567,10 +778,10 @@ public class HardwareManager {
 
 				try {
 					Runtime.getRuntime().exec(
-							"sudo i2cset -y 1 0x25 " + byte1Str);
+							"/usr/sbin/i2cset -y 1 0x25 " + byte1Str);
 
 					Runtime.getRuntime().exec(
-							"sudo i2cset -y 1 0x26 " + byte2Str);
+							"/usr/sbin/i2cset -y 1 0x26 " + byte2Str);
 
 					// System.out.println("sudo i2cset -y 1 0x25 " + byte1Str);
 					// System.out.println("sudo i2cset -y 1 0x26 " + byte2Str);
@@ -595,8 +806,10 @@ public class HardwareManager {
 		File directory = new File(path);
 		File[] devices = directory.listFiles();
 
-		for (File f : devices) {
-			returnList.add(f.getName());
+		if (devices != null) {
+			for (File f : devices) {
+				returnList.add(f.getName());
+			}
 		}
 
 		return returnList;
@@ -711,6 +924,42 @@ public class HardwareManager {
 			}
 		}
 
+	}
+
+	private static void updateADCSensorValues(String valuesJson) {
+
+		JsonParser parser = new JsonParser();
+		JsonObject jo = (JsonObject) parser.parse(valuesJson);
+
+		Set<Entry<String, JsonElement>> set = jo.entrySet();
+		Iterator<Entry<String, JsonElement>> iterator = set.iterator();
+		while (iterator.hasNext()) {
+
+			Entry<String, JsonElement> entry = iterator.next();
+			String sensorAddressStr = entry.getKey();
+
+			for (Sensor sensor : sensors) {
+
+				if (sensor.getAddress().equals(sensorAddressStr)) {
+					// if (sensor.getSensorName() == sensorName) {
+					float rawValue = jo.getAsJsonPrimitive(sensorAddressStr)
+							.getAsFloat();
+
+					// round to nearest 2...
+					int roundedValue = Math.round(rawValue / 2f) * 2;
+
+					boolean changed = sensor.getValue() != roundedValue;
+					if (changed) {
+						Logger.log("DATA", sensor.getSensorName() + ": "
+								+ roundedValue);
+						notifySensorChanged(sensor);
+						sensor.setValue(roundedValue);
+					}
+
+					break;
+				}
+			}
+		}
 	}
 
 	private static void notifySensorChanged(Sensor sensor) {

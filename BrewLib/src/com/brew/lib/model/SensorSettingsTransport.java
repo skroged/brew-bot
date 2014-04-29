@@ -4,7 +4,7 @@ public class SensorSettingsTransport {
 
 	private Float value;
 	private Float calibratedValue;
-	private SENSOR_NAME sensorName;
+	private int sensorId;
 	private float inputLow;
 	private float outputLow;
 	private float inputHigh;
@@ -14,12 +14,16 @@ public class SensorSettingsTransport {
 	public SensorSettingsTransport(Sensor sensor) {
 		value = sensor.getValue();
 		calibratedValue = sensor.getCalibratedValue();
-		sensorName = sensor.getSensorName();
+		sensorId = sensor.getSensorId();
 		inputLow = sensor.getCalibration().getInputLow();
 		outputLow = sensor.getCalibration().getOutputLow();
 		inputHigh = sensor.getCalibration().getInputHigh();
 		outputHigh = sensor.getCalibration().getOutputHigh();
 		address = sensor.getAddress();
+	}
+
+	public SensorSettingsTransport() {
+		// TODO Auto-generated constructor stub
 	}
 
 	public Float getValue() {
@@ -28,14 +32,6 @@ public class SensorSettingsTransport {
 
 	public void setValue(Float value) {
 		this.value = value;
-	}
-
-	public SENSOR_NAME getSensorName() {
-		return sensorName;
-	}
-
-	public void setSensorName(SENSOR_NAME sensorName) {
-		this.sensorName = sensorName;
 	}
 
 	public Float getCalibratedValue() {
@@ -84,6 +80,14 @@ public class SensorSettingsTransport {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public int getSensorId() {
+		return sensorId;
+	}
+
+	public void setSensorId(int sensorId) {
+		this.sensorId = sensorId;
 	}
 
 }

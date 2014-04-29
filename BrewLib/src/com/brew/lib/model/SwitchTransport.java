@@ -2,16 +2,8 @@ package com.brew.lib.model;
 
 public class SwitchTransport {
 
-	private SWITCH_NAME switchName;
+	private int switchId;
 	private Boolean switchValue;
-
-	public SWITCH_NAME getSwitchName() {
-		return switchName;
-	}
-
-	public void setSwitchName(SWITCH_NAME switchName) {
-		this.switchName = switchName;
-	}
 
 	public Boolean getSwitchValue() {
 		return switchValue;
@@ -19,5 +11,13 @@ public class SwitchTransport {
 
 	public void setSwitchValue(Boolean switchValue) {
 		this.switchValue = switchValue;
+	}
+
+	public int getSwitchId() {
+		return switchId;
+	}
+
+	public void setSwitchId(int switchId) {
+		this.switchId = switchId;
 	}
 }

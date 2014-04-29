@@ -7,7 +7,10 @@ import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.brew.lib.model.BrewData;
 import com.brew.lib.model.BrewMessage;
 import com.brew.lib.model.CHANNEL_PERMISSION;
 import com.brew.lib.model.GsonHelper;
@@ -86,7 +89,7 @@ public class SocketConnection {
 
 		}
 
-		switch (message.getMethod()) { 
+		switch (message.getMethod()) {
 
 		case REQUEST_ANDROID_APK:
 
@@ -97,7 +100,7 @@ public class SocketConnection {
 				Logger.log("ERROR", e.getMessage());
 			}
 
-			break; 
+			break;
 
 		case REQUEST_SERVER_INFO:
 
@@ -180,7 +183,24 @@ public class SocketConnection {
 			BrewMessage loginResultMessage = new BrewMessage();
 			loginResultMessage.setMethod(SOCKET_METHOD.LOGIN_RESULT);
 			loginResultMessage.setSuccess(user != null);
+
+			BrewData loginBrewData = new BrewData();
+			List<User> loginUsers = new ArrayList<User>();
+			loginUsers.add(user);
+			loginBrewData.setUsers(loginUsers);
+			loginResultMessage.setData(loginBrewData);
+
 			sendMessage(loginResultMessage);
+
+			break;
+
+		case LOGOUT_USER:
+
+			Logger.log("AUTH",
+					"user logged out: "
+							+ (user != null ? user.getUsername() : "null"));
+
+			user = null;
 
 			break;
 
@@ -247,6 +267,11 @@ public class SocketConnection {
 
 			if (channelPermission == CHANNEL_PERMISSION.NONE) {
 
+				if (user == null) {
+					Logger.log("SOCKET", "no user for socket on channel "
+							+ subscribeChannel);
+					return;
+				}
 				Logger.log("SOCKET",
 						"no permission for user " + user.getUsername()
 								+ " on channel " + subscribeChannel);
@@ -258,6 +283,8 @@ public class SocketConnection {
 					+ " subscribed to channel " + subscribeChannel
 					+ " with permission " + channelPermission);
 
+			// remove first to prevent duplicates
+			SocketChannel.get(subscribeChannel).removeSocketConnection(this);
 			SocketChannel.get(subscribeChannel).addSocketConnection(this);
 
 			switch (subscribeChannel) {
